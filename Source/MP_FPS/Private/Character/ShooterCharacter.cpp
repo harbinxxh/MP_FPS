@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ShooterCharacter.h"
+#include "Character/ShooterCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
@@ -25,7 +25,9 @@ AShooterCharacter::AShooterCharacter()
 	Mesh1P->SetupAttachment(FirstPersonCamera);
 	// 只有控制者才能看到这个网格，要确保只有当你操控角色时，它才会显示
 	Mesh1P->bOnlyOwnerSee = true;
+	// 这样一来其他玩家就看不到手臂部分了，只让我们自己看见
 	Mesh1P->bOwnerNoSee = false;
+	// 取消阴影投射
 	Mesh1P->bCastDynamicShadow = false;
 	// 不希望贴花显示在手臂模型上
 	Mesh1P->bReceivesDecals = false;

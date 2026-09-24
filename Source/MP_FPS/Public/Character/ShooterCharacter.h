@@ -8,6 +8,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UCombatComponent;
 
 
 UCLASS()
@@ -25,6 +26,9 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCombatComponent> Combat;
 
 	// 1st person View (arms) 用于第一人称视角的手臂
 	UPROPERTY(VisibleAnywhere)

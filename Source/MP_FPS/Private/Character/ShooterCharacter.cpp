@@ -5,6 +5,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Combat/CombatComponent.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -57,6 +58,9 @@ AShooterCharacter::AShooterCharacter()
 	GetMesh()->bOnlyOwnerSee = false;
 	GetMesh()->bOwnerNoSee = true;
 	GetMesh()->bReceivesDecals = false;
+
+	Combat = CreateDefaultSubobject<UCombatComponent>("Combat");
+	Combat->SetIsReplicated(true);// 开启组件复制功能
 }
 
 void AShooterCharacter::BeginPlay()

@@ -3,11 +3,22 @@
 
 #include "Character/ShooterCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 
 AShooterCharacter::AShooterCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	// 开启Pawn下蹲功能:
+	// 直接改组件的类默认值，蓝图子类若未显式覆盖就会继承
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		// 组件构造函数里改 NavAgentProps.bCanCrouch（这才是 CharacterMovement 自己的权威字段，蓝图上的 Can Crouch 勾选框绑定的就是它）
+		MoveComp->NavAgentProps.bCanCrouch = true; // 权威字段
+		// 只改 MovementState.bCanCrouch 属于"改了缓存副本"，一旦 NavAgentProps 重新同步过来就没了
+		MoveComp->MovementState.bCanCrouch = true; // 同步缓存
+	}
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
 	SpringArm->SetupAttachment(GetRootComponent());

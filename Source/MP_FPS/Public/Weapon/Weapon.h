@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayTagContainer.h"
 #include "Weapon.generated.h"
 
 UCLASS()
@@ -20,6 +21,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, Category = "FPS|WeaponType")
+	FGameplayTag WeaponType;
+
 private:
 
 	// Mesh1P 和 Mesh3P 在两种视角下会呈现两套不同的武器
@@ -31,4 +35,6 @@ private:
 	// WeaponMesh: 3rd person view
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USkeletalMeshComponent> Mesh3P;
+
+
 };

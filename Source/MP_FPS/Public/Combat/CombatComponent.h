@@ -30,6 +30,7 @@ public:
 	TObjectPtr<UWeaponData> WeaponData;
 
 	// 生成物品栏函数
+	// SpawnInventory() 函数只会在服务器上实例化武器
 	void SpawnInventory();
 	// 销毁物体栏函数
 	void DestroyInventory();

@@ -28,4 +28,13 @@ public:
 	// 获取武器挂载点
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	FName GetWeaponAttachPoint(const FGameplayTag& WeaponType) const;
+
+	// 获取第一人称骨骼网格组件
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	USkeletalMeshComponent* GetMesh1P() const;
+
+	// 获取第三人称骨骼网格组件
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	USkeletalMeshComponent* GetMesh3P() const;
+
 };

@@ -22,12 +22,16 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	// PossessedBy() 只能在 Server / Standalone 上被调用
-	// 当某个 Controller 决定控制这个 Pawn 时,引擎在 AController::OnPossess 里主动调用它
+	/**
+	* PossessedBy() 函数只能在 Server / Standalone 上被调用
+	* 当某个 Controller 决定控制这个 Pawn 时，引擎在 AController::OnPossess 里主动调用它
+	*/
 	virtual void PossessedBy(AController* NewController) override;
 
 	/** PlayerInterface */
 	virtual FName GetWeaponAttachPoint_Implementation(const FGameplayTag& WeaponType) const override;
+	virtual USkeletalMeshComponent* GetMesh1P_Implementation() const;
+	virtual USkeletalMeshComponent* GetMesh3P_Implementation() const;
 	/** ~PlayerInterface */
 
 protected:

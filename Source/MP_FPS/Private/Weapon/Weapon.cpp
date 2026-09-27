@@ -23,7 +23,7 @@ AWeapon::AWeapon()
 	Mesh1P->bReceivesDecals = false;
 	Mesh1P->CastShadow = false;
 	// Mesh1P 默认设置隐藏，这样就能在运行时动态调整它，根据武器生成、附加绑定并交付给角色后的当前视角来决定
-	Mesh1P->SetHiddenInGame(true);
+	//Mesh1P->SetHiddenInGame(true);
 	SetRootComponent(Mesh1P);
 
 	Mesh3P = CreateDefaultSubobject<USkeletalMeshComponent>("Mesh3P");
@@ -33,7 +33,7 @@ AWeapon::AWeapon()
 	// 当第一人称视角时，而我们自己看手臂时，我们手上拿的武器根本没必要投阴影，这能带来不错的性能优化
 	Mesh3P->CastShadow = true;
 	Mesh3P->SetupAttachment(Mesh1P);
-	Mesh3P->SetHiddenInGame(true);
+	//Mesh3P->SetHiddenInGame(true);
 }
 
 USkeletalMeshComponent* AWeapon::GetMesh1P() const

@@ -7,6 +7,7 @@
 #include "CombatComponent.generated.h"
 
 class UWeaponData;
+class AWeapon;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MP_FPS_API UCombatComponent : public UActorComponent
@@ -28,8 +29,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponData;
 
+	// 生成物品栏函数
+	void SpawnInventory();
+	// 销毁物体栏函数
+	void DestroyInventory();
 protected:
 
 private:
+	// 武器类型
+	// 后面会将武器类型变量改为数组-现在先实现武器生成功能
+	UPROPERTY(EditDefaultsOnly, Category = "FPS|Weapon")
+	TSubclassOf<AWeapon> DefaultWeaponClass;
 
+	// 武器生成函数：
+	// 函数将生成一个单独的武器，并返回指向它的指针
+	AWeapon* SpawnSeapon(TSubclassOf<AWeapon> WeaponClass) const;
 };

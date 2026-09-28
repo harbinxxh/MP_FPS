@@ -4,6 +4,7 @@
 #include "Combat/CombatComponent.h"
 #include "Engine/Engine.h"
 #include "Weapon/Weapon.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -16,6 +17,13 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+}
+
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UCombatComponent, Inventory);
 }
 
 void UCombatComponent::Initiate_CycleWeapon()
@@ -51,10 +59,20 @@ void UCombatComponent::Initiate_Aim_Released()
 // SpawnInventory() 函数只会在服务器上实例化武器
 void UCombatComponent::SpawnInventory()
 {
-	AWeapon* NewWeapon = SpawnSeapon(DefaultWeaponClass);
-	if (IsValid(NewWeapon))
+	// 需要检测权威性，然后遍历库存中的武器类型
+	if (GetOwner()->GetLocalRole() < ROLE_Authority) return;
+
+	for (TSubclassOf<AWeapon>& WeaponClass : DefaultWeaponClasses)
 	{
-		NewWeapon->AttachToOwningPawn();
+		AWeapon* Weapon = SpawnSeapon(WeaponClass);
+		Inventory.AddUnique(Weapon);
+	}
+
+	// 现在把武器附加上去，算是临时装备了，之后会做更多事，比如设置当前武器变量。
+	// 目前重点是展示并附着其中一把武器
+	if (Inventory.Num() > 0)
+	{
+		Inventory[0]->AttachToOwningPawn();
 	}
 
 	/**

@@ -17,6 +17,7 @@ class MP_FPS_API UCombatComponent : public UActorComponent
 public:	
 	UCombatComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	// Cycle to the next weapon in the inventory
 	void Initiate_CycleWeapon();		// 切换武器
@@ -37,10 +38,14 @@ public:
 protected:
 
 private:
-	// 武器类型
-	// 后面会将武器类型变量改为数组-现在先实现武器生成功能
+	// 保存生成的武器指针数组
+	// 网络复制数组：Transient 标记为瞬态，不能保存到硬盘上
+	UPROPERTY(Transient, Replicated)
+	TArray<AWeapon*> Inventory;
+
+	// 武器类型数组：比如 手枪类、步枪类等...
 	UPROPERTY(EditDefaultsOnly, Category = "FPS|Weapon")
-	TSubclassOf<AWeapon> DefaultWeaponClass;
+	TArray<TSubclassOf<AWeapon>> DefaultWeaponClasses;
 
 	// 武器生成函数：
 	// 函数将生成一个单独的武器，并返回指向它的指针

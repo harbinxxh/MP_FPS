@@ -24,6 +24,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UCombatComponent, Inventory);
+	DOREPLIFETIME(UCombatComponent, CurrentWeapon);
 }
 
 void UCombatComponent::Initiate_CycleWeapon()
@@ -56,6 +57,14 @@ void UCombatComponent::Initiate_Aim_Released()
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, TEXT("Initiate_Aim_Released"), false);
 }
 
+void UCombatComponent::Equip(AWeapon* Weapon)
+{
+	// 这会改变CurrentWeapon复制变量，让它同步复制，并让它的onRep函数在客户端自动触发
+	CurrentWeapon = Weapon;
+	// 挂载武器
+	CurrentWeapon->AttachToOwningPawn();
+}
+
 // SpawnInventory() 函数只会在服务器上实例化武器
 void UCombatComponent::SpawnInventory()
 {
@@ -72,7 +81,7 @@ void UCombatComponent::SpawnInventory()
 	// 目前重点是展示并附着其中一把武器
 	if (Inventory.Num() > 0)
 	{
-		Inventory[0]->AttachToOwningPawn();
+		Equip(Inventory[0]);
 	}
 
 	/**
@@ -94,7 +103,26 @@ void UCombatComponent::SpawnInventory()
 
 void UCombatComponent::DestroyInventory()
 {
-	// TODO: Destroy the inventory once we have one.
+	// Destroy the inventory once we have one.
+	for (AWeapon* Weapon : Inventory)
+	{
+		if (IsValid(Weapon))
+		{
+			Weapon->Destroy();
+		}
+	}
+}
+
+void UCombatComponent::OnRep_CurrentWeapon(AWeapon* LastWeapon)
+{
+	if (!IsValid(CurrentWeapon)) return;
+	CurrentWeapon->AttachToOwningPawn();
+
+	/**
+	* 还需要在Weapon类中的OnRep_Instigator()函数里完成这个操作
+	* 因为，当我们生成武器并设定当前武器时,有时候多个对象的复制顺序是不可预测的
+	* 所以，我们得确保在有有效实例者时执行这个操作
+	*/
 }
 
 AWeapon* UCombatComponent::SpawnSeapon(TSubclassOf<AWeapon> WeaponClass) const

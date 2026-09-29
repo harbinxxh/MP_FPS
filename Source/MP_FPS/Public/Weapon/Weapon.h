@@ -45,11 +45,12 @@ public:
 	// 把武器绑定到拥有者，也就是控制的Pawn上
 	void AttachToOwningPawn() const;
 
-protected:
-	virtual void BeginPlay() override;
-
+	// 武器类型：根据武器类型决定该播放哪些姿势或蒙太奇
 	UPROPERTY(EditAnywhere, Category = "FPS|WeaponType")
 	FGameplayTag WeaponType;
+
+protected:
+	virtual void BeginPlay() override;
 
 private:
 

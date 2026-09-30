@@ -38,6 +38,20 @@ public:
 	void SpawnInventory();
 	// 销毁物体栏函数
 	void DestroyInventory();
+	
+	/**
+	 * 服务器端： 
+	 * 如果在服务器端修改了bAiming值，会复制到所有其他客户端，拥有者客户端除外
+	 * 拥有者本地客户端自己会设置并触发瞄准按下动作
+	 * 
+	 * 客户端：
+	 * 如果在本地客户端修改了bAiming值，服务器根本不会知道本地客户端做了什么，
+	 * 必须主动通知服务器端，因此，需要服务器RPC
+	 */
+	// 瞄准变量：将其设为蓝图只读且已复制，动画蓝图可以直接使用它
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	bool bAiming;
+
 protected:
 	// 因为我们得能在各种类里查当前武器的类型，比如动画蓝图
 	// 如果动画蓝图知道武器类型，它就能知道待机时该用哪些姿态，等等
@@ -64,4 +78,15 @@ private:
 	// 武器生成函数：
 	// 函数将生成一个单独的武器，并返回指向它的指针
 	AWeapon* SpawnSeapon(TSubclassOf<AWeapon> WeaponClass) const;
+
+	/**
+	 * 服务器RPC : 在客户端上调用函数，并在服务器上执行
+	 * 客户端修改了bAiming值，需要通知服务器端，就需要服务器RPC
+	 * 用同一个函数开启瞄准状态，也同时能取消瞄准
+	 */
+	UFUNCTION(Server, Reliable)
+	void Server_Aim(bool bPressed);
+
+	// 用来处理瞄准 bAiming 变量
+	void Local_Aim(bool bPressed);
 };

@@ -25,6 +25,12 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 
 	DOREPLIFETIME(UCombatComponent, Inventory);
 	DOREPLIFETIME(UCombatComponent, CurrentWeapon);
+	/**
+	 * COND_SkipOwner:此属性会发送给除拥有者之外的所有连接
+	 * 跳过拥有者，因为在本地通过右键鼠标或手柄左扳机来设置瞄准，所以不需要把更新发回自己
+	 * 所以本地设置瞄准，就不用让服务器再把数据推回来，它是复制变量，让其他玩家都能看见我们瞄准，但不需要同步回我们自己
+	 */
+	DOREPLIFETIME_CONDITION(UCombatComponent, bAiming, COND_SkipOwner);
 }
 
 void UCombatComponent::Initiate_CycleWeapon()
@@ -47,16 +53,32 @@ void UCombatComponent::Initiate_ReloadWeapon()
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, TEXT("Initiate_ReloadWeapon"), false);
 }
 
+// 瞄准按下
 void UCombatComponent::Initiate_Aim_Pressed()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, TEXT("Initiate_Aim_Pressed"), false);
+	Local_Aim(true);
+	Server_Aim(true);// 向服务器发送瞄准值
 }
 
+// 瞄准释放
 void UCombatComponent::Initiate_Aim_Released()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, TEXT("Initiate_Aim_Released"), false);
+	Local_Aim(false);
+	Server_Aim(false);// 向服务器发送瞄准值
 }
 
+// 服务器RPC : 在客户端上调用函数，并在服务器上执行
+void UCombatComponent::Server_Aim_Implementation(bool bPressed)
+{
+	Local_Aim(bPressed);
+}
+
+void UCombatComponent::Local_Aim(bool bPressed)
+{
+	bAiming = bPressed;
+}
+
+// 装备武器函数，只能在服务器上执行
 void UCombatComponent::Equip(AWeapon* Weapon)
 {
 	// 这会改变CurrentWeapon复制变量，让它同步复制，并让它的onRep函数在客户端自动触发
@@ -155,4 +177,3 @@ AWeapon* UCombatComponent::SpawnSeapon(TSubclassOf<AWeapon> WeaponClass) const
 
 	return GetWorld()->SpawnActor<AWeapon>(WeaponClass, SpawnInfo);
 }
-

@@ -38,6 +38,9 @@ public:
 	virtual void BeginDestroy() override;
 
 protected:
+	// BlueprintReadOnly 默认不能作用于 private 私有成员内
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Combat")
+	TObjectPtr<UCombatComponent> Combat;
 
 private:
 
@@ -51,9 +54,6 @@ private:
 	// 武器瞄准回调函数
 	void Input_AimWeapon_Pressed();
 	void Input_AimWeapon_Released();
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UCombatComponent> Combat;
 
 	// 1st person View (arms) 用于第一人称视角的手臂
 	UPROPERTY(VisibleAnywhere)

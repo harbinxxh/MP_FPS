@@ -27,7 +27,7 @@ public:
 	void Initiate_Aim_Pressed();		// 瞄准按下
 	void Initiate_Aim_Released();		// 瞄准释放
 
-	UPROPERTY(EditDefaultsOnly, Category = "FPS|Weapon")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponData;
 
 	// 装备武器函数，只能在服务器上执行
@@ -39,14 +39,11 @@ public:
 	// 销毁物体栏函数
 	void DestroyInventory();
 protected:
-
-private:
-
 	// 因为我们得能在各种类里查当前武器的类型，比如动画蓝图
 	// 如果动画蓝图知道武器类型，它就能知道待机时该用哪些姿态，等等
-	UPROPERTY(Transient, ReplicatedUsing = OnRep_CurrentWeapon)
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentWeapon)
 	TObjectPtr<AWeapon> CurrentWeapon;
-
+private:
 	/**
 	* 复制通知函数：在C++中，如果你在服务器上修改复制变量，那么只会在客户端触发 RepNotify 复制通知函数
 	* 复制通知函数：能接收变量类型参数，这样就能得到该变量的前值，也就是复制前的值，有时候需要这个信息时特别实用

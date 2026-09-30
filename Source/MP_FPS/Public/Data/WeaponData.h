@@ -94,14 +94,14 @@ public:
 	* 键就是游戏玩法标签
 	* 值就是握把点，也就是个FName
 	*/
-	UPROPERTY(EditDefaultsOnly, Category = "FPS|WeaponData|Weapons")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|WeaponData|Weapons")
 	TMap<FGameplayTag, FName> GripPoints;
 
 	// 第一人称动画
-	UPROPERTY(EditDefaultsOnly, Category = "FPS|WeaponData|FirstPerson")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|WeaponData|FirstPerson")
 	TMap<FGameplayTag, FPlayerAnims> FirstPersonAnims;
 
 	// 第三人称动画
-	UPROPERTY(EditDefaultsOnly, Category = "FPS|WeaponData|ThirdPerson")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|WeaponData|ThirdPerson")
 	TMap<FGameplayTag, FPlayerAnims> ThirdPersonAnims;
 };

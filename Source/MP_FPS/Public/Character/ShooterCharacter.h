@@ -37,6 +37,10 @@ public:
 	virtual void BeginPlay() override;
 	virtual void BeginDestroy() override;
 
+	// 用来修改瞄准旋转值
+	UFUNCTION(BlueprintCallable)
+	FRotator GetFixedAimRotation() const;
+
 protected:
 	// BlueprintReadOnly 默认不能作用于 private 私有成员内
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Combat")

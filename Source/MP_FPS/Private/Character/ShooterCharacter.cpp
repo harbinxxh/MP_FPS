@@ -86,6 +86,30 @@ void AShooterCharacter::BeginDestroy()
 	}
 }
 
+// 用来修改瞄准旋转值
+FRotator AShooterCharacter::GetFixedAimRotation() const
+{
+	/**
+	 * 问题的原因：
+	 * 现在俯仰角在 [270,360) 之间, 问题就出在这段区间里, 如果俯仰角落在这个区间里, 就得把它映射到负[-90,0]的范围内
+	 * 我们要做的，就是把俯仰从当前区间，映射到能用的区间
+	 */	
+
+	FRotator AimRotation = GetBaseAimRotation();
+
+	// 俯仰值大于90度并且是远程控制，需要转换旋转值
+	if (AimRotation.Pitch > 90.f && !IsLocallyControlled())
+	{
+		// map pitch from [270, 360) to [-90, 0]
+		const FVector2D InRange(270.f, 360.f);
+		const FVector2D OutRange(-90.f, 0.f);
+		// 对于给定的值，若其被限制在[输入范围]内（含边界），则返回对应值在[输出范围]内的百分比。
+		AimRotation.Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AimRotation.Pitch);
+	}
+
+	return AimRotation;
+}
+
 void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

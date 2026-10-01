@@ -42,6 +42,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Combat")
 	TObjectPtr<UCombatComponent> Combat;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Camera")
+	TObjectPtr<UCameraComponent> FirstPersonCamera;
+
+	// 玩家角色默认视野值
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Aiming")
+	float DefaultFieldOfView;
+
+	// BlueprintImplementableEvent：在蓝图中实现，只在本地使用，完全不用在意在蓝图里实现会有什么性能开销
+	// 将在瞄准时被触发，用来判断当前是进入瞄准状态还是退出瞄准状态
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnAim(bool bIsAiming);
+
 private:
 
 	// 切换武器回调函数
@@ -61,9 +73,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArm;
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UCameraComponent> FirstPersonCamera;
 
 	// 切换武器Action
 	UPROPERTY(EditAnywhere, Category = "FPS|Input")

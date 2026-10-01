@@ -63,12 +63,17 @@ AShooterCharacter::AShooterCharacter()
 
 	Combat = CreateDefaultSubobject<UCombatComponent>("Combat");
 	Combat->SetIsReplicated(true);// 开启组件复制功能
+
+	// 角色默认视野值
+	DefaultFieldOfView = 90.0f;
 }
 
 void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// 设置透视模式下的水平视野（以度为单位）（正交模式下忽略）
+	FirstPersonCamera->SetFieldOfView(DefaultFieldOfView);
 }
 
 void AShooterCharacter::BeginDestroy()
@@ -151,9 +156,11 @@ void AShooterCharacter::Input_FireWeapon_Released()
 void AShooterCharacter::Input_AimWeapon_Pressed()
 {
 	Combat->Initiate_Aim_Pressed();
+	OnAim(true); // 按住时瞄准
 }
 
 void AShooterCharacter::Input_AimWeapon_Released()
 {
 	Combat->Initiate_Aim_Released();
+	OnAim(false); // 松开时取消瞄准
 }

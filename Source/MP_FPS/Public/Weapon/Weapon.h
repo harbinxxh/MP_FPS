@@ -49,6 +49,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FPS|WeaponType")
 	FGameplayTag WeaponType;
 
+	// 武器瞄准视野值
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Aiming")
+	float AimFieldView;
+
 protected:
 	virtual void BeginPlay() override;
 

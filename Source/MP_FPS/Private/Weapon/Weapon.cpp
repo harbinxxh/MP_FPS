@@ -34,6 +34,8 @@ AWeapon::AWeapon()
 	Mesh3P->CastShadow = true;
 	Mesh3P->SetupAttachment(Mesh1P);
 	Mesh3P->SetHiddenInGame(true);
+
+	AimFieldView = 65.0f;
 }
 
 // 在 OnRep_Instigator() 函数里，调用 AttachToOwningPawn() 函数，为玩家角色绑定武器

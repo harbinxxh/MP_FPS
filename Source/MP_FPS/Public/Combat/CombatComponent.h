@@ -52,11 +52,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	bool bAiming;
 
-protected:
 	// 因为我们得能在各种类里查当前武器的类型，比如动画蓝图
 	// 如果动画蓝图知道武器类型，它就能知道待机时该用哪些姿态，等等
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentWeapon)
 	TObjectPtr<AWeapon> CurrentWeapon;
+
+protected:
+
 private:
 	/**
 	* 复制通知函数：在C++中，如果你在服务器上修改复制变量，那么只会在客户端触发 RepNotify 复制通知函数

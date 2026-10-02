@@ -41,6 +41,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FRotator GetFixedAimRotation() const;
 
+	// 插槽变换变量，用来存储变换值，并能在蓝图中访问此变量变量
+	UPROPERTY(BlueprintReadOnly, Category = "FPS|FABRIK")
+	FTransform FABRIK_SocketTransform;
+
 protected:
 	// BlueprintReadOnly 默认不能作用于 private 私有成员内
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Combat")
@@ -70,6 +74,9 @@ private:
 	// 武器瞄准回调函数
 	void Input_AimWeapon_Pressed();
 	void Input_AimWeapon_Released();
+
+	// 计算将位置/旋转从世界空间转换为骨骼相对空间
+	void CalculateFABRIKSocketTransform();
 
 	// 1st person View (arms) 用于第一人称视角的手臂
 	UPROPERTY(VisibleAnywhere)

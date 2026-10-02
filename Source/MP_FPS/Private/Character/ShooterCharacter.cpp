@@ -8,6 +8,7 @@
 #include "Combat/CombatComponent.h"
 #include "EnhancedInputComponent.h"
 #include "Data/WeaponData.h"
+#include "Weapon/Weapon.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -114,6 +115,37 @@ void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 计算将位置/旋转从世界空间转换为骨骼相对空间
+	CalculateFABRIKSocketTransform();
+}
+
+void AShooterCharacter::CalculateFABRIKSocketTransform()
+{
+	// 先判断战斗组件是否有效，在判断武器是否有效，我们需要武器的网格，因为网格里有 Fabric 插槽
+	if (IsValid(Combat) && IsValid(Combat->CurrentWeapon) && IsValid(Combat->CurrentWeapon->GetMesh3P()))
+	{
+		FABRIK_SocketTransform = Combat->CurrentWeapon->GetMesh3P()->GetSocketTransform("FABRIK_Socket", RTS_World);
+
+		// 将变换转至骨骼空间需要两个输出参数
+		FVector OutLocation;
+		FRotator OutRotation;
+
+		/**
+		 * 将位置 / 旋转从世界空间转换为骨骼相对空间。
+		 * 如果你知道某个骨骼附件在世界空间中的位置，这会很有用，因为 AttachComponent 会接受骨骼相对空间中的位置 / 旋转。
+		 */
+		GetMesh()->TransformToBoneSpace(
+			"hand_r",
+			FABRIK_SocketTransform.GetLocation(),
+			// 这里要从四元数转成旋转值
+			FABRIK_SocketTransform.GetRotation().Rotator(),
+			OutLocation,
+			OutRotation);
+
+		FABRIK_SocketTransform.SetLocation(OutLocation);
+		// 旋转数据将还原为四元数格式，因为旋转数据正是以四元数形式存储的
+		FABRIK_SocketTransform.SetRotation(OutRotation.Quaternion());
+	}
 }
 
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

@@ -45,6 +45,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "FPS|FABRIK")
 	FTransform FABRIK_SocketTransform;
 
+	// 判断当前玩家是否有武器
+	UFUNCTION(BlueprintCallable)
+	bool HasCurrentWeapon() const;
+
 protected:
 	// BlueprintReadOnly 默认不能作用于 private 私有成员内
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Combat")
@@ -77,6 +81,9 @@ private:
 
 	// 计算将位置/旋转从世界空间转换为骨骼相对空间
 	void CalculateFABRIKSocketTransform();
+
+	// 计算原地转向参数函数：用来根据瞄准方向计算一些关键参数
+	void CalculateTurnInPlaceParameters();
 
 	// 1st person View (arms) 用于第一人称视角的手臂
 	UPROPERTY(VisibleAnywhere)

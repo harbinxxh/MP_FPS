@@ -111,13 +111,57 @@ FRotator AShooterCharacter::GetFixedAimRotation() const
 	return AimRotation;
 }
 
+bool AShooterCharacter::HasCurrentWeapon() const
+{
+	return IsValid(Combat) && Combat->CurrentWeapon != nullptr;
+}
+
 void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 计算将位置/旋转从世界空间转换为骨骼相对空间
+	CalculateTurnInPlaceParameters();
 	CalculateFABRIKSocketTransform();
 }
+
+void AShooterCharacter::CalculateTurnInPlaceParameters()
+{
+	// 函数代码执行步骤：
+	
+	// Get velocity, see if it's zero
+	// See if we are falling
+
+	// if standing still and not jumping - 如果站着不动，又没有跳跃
+		//1、get current aim rotation
+		//2、get delta aim rotation - the difference in rotation of my current aim rotation from the initial aim rotation
+		// 3、(initial aim rotation is calculated in BeginPlay)
+		// 4、Store the Yaw of the delta aim rotation (AO_Yaw)
+		// 5、if Turningstatus == NotTurning
+			// 5.1、Set InterpA0_Yaw to A0_Yaw
+		// 6、TurnInPlace() - interpolates the InterpAo_Yaw value to zero.
+
+	// if running or jumping - 现在，我们在跑或跳
+		//1、reset initial aim rotation to the current actual aim rotation
+		//2、A0_Yaw = 0
+		//3、We also need a Movement Offset Yaw to feed to our strafing blendspaces.
+		//4、Get Base Aim Rotation
+		//5、Get our Movement Rotation - this is the rotation of our Velocity
+		//6、Movement Offset Yaw = the delta between our movement rotation and our aim rotation.
+		//7、TurningStatus = NotTurning
+}
+
+// 原地转向函数执行步骤：
+// Turn In Place
+	//1、if AO_Yaw > 90
+		// Turningstatus = Right
+	//2、else if AO_Yaw > -90
+		// Turningstatus = Left
+	//3、if TurningStatus != NotTurning (in other words, we are turning left or right)
+		//3.1、Interpolate InterpA0_Yaw down to zero.
+		//3.2、A0_Yaw = InterpA0_Yaw
+		//3.3、if Abs(A0_Yaw) < 5.f
+			//3.3.1、 Turningstatus = NotTurning
+			//3.3.2、 reset initial aim rotation to our actual aim rotation
 
 void AShooterCharacter::CalculateFABRIKSocketTransform()
 {

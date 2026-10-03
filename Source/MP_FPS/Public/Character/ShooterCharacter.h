@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/PlayerInterface.h"
+#include "ShooterTypes/ShooterTypes.h"
 #include "ShooterCharacter.generated.h"
 
 class USpringArmComponent;
@@ -66,6 +67,18 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnAim(bool bIsAiming);
 
+	// 瞄准旋转差值的水平分量
+	UPROPERTY(BlueprintReadOnly, Category = "FPS|TurnInPlace")
+	float AO_Yaw;
+
+	// 移动偏移俯仰角差值
+	UPROPERTY(BlueprintReadOnly, Category = "FPS|Strafing")
+	float MovementOffsetYaw;
+
+	// 旋转状态
+	UPROPERTY(BlueprintReadOnly, Category = "FPS|TurnInPlace")
+	ETurningInPlace TurningStatus;
+
 private:
 
 	// 切换武器回调函数
@@ -83,7 +96,15 @@ private:
 	void CalculateFABRIKSocketTransform();
 
 	// 计算原地转向参数函数：用来根据瞄准方向计算一些关键参数
-	void CalculateTurnInPlaceParameters();
+	void CalculateTurnInPlaceParameters(float DeltaTime);
+
+	// 原地旋转函数
+	void TurnInPlace(float DeltaTime);
+
+	// 起始瞄准旋转
+	FRotator StartingAimRotation;
+	// 插值变量：专门负责插值处理
+	float InterpA0_Yaw;
 
 	// 1st person View (arms) 用于第一人称视角的手臂
 	UPROPERTY(VisibleAnywhere)

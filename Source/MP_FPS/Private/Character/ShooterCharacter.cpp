@@ -9,6 +9,7 @@
 #include "EnhancedInputComponent.h"
 #include "Data/WeaponData.h"
 #include "Weapon/Weapon.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -67,6 +68,7 @@ AShooterCharacter::AShooterCharacter()
 
 	// 角色默认视野值
 	DefaultFieldOfView = 90.0f;
+	TurningStatus = ETurningInPlace::NotTurning;
 }
 
 void AShooterCharacter::BeginPlay()
@@ -75,6 +77,8 @@ void AShooterCharacter::BeginPlay()
 	
 	// 设置透视模式下的水平视野（以度为单位）（正交模式下忽略）
 	FirstPersonCamera->SetFieldOfView(DefaultFieldOfView);
+
+	StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 }
 
 void AShooterCharacter::BeginDestroy()
@@ -120,48 +124,99 @@ void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	CalculateTurnInPlaceParameters();
+	CalculateTurnInPlaceParameters(DeltaTime);
 	CalculateFABRIKSocketTransform();
 }
 
-void AShooterCharacter::CalculateTurnInPlaceParameters()
+void AShooterCharacter::CalculateTurnInPlaceParameters(float DeltaTime)
 {
-	// 函数代码执行步骤：
-	
-	// Get velocity, see if it's zero
-	// See if we are falling
+	// 获取速度 - Get velocity, see if it's zero
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;					// 真正在意的只有横向速度，不关心速度的 Z 分量
+	// 获取此向量的长度（模）
+	float Speed = Velocity.Size();		// Size2D() 会忽略 Z 分量，也可以使用 Size2D() 函数
 
-	// if standing still and not jumping - 如果站着不动，又没有跳跃
+	// 是否在坠落 - See if we are falling
+	bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	// 站着不动也没跳跃 - if standing still and not jumping
+	if (Speed == 0.f && !bIsInAir)
+	{
 		//1、get current aim rotation
+		//1、获取当前的瞄准旋转，只需要其中的偏航角
+		FRotator CurrentAimRotation(0.f, GetBaseAimRotation().Yaw, 0.f);
+		
 		//2、get delta aim rotation - the difference in rotation of my current aim rotation from the initial aim rotation
-		// 3、(initial aim rotation is calculated in BeginPlay)
-		// 4、Store the Yaw of the delta aim rotation (AO_Yaw)
-		// 5、if Turningstatus == NotTurning
-			// 5.1、Set InterpA0_Yaw to A0_Yaw
-		// 6、TurnInPlace() - interpolates the InterpAo_Yaw value to zero.
+		//2、计算瞄准旋转插值，就是当前瞄准旋转和初始瞄准旋转之间的角度差
+		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 
-	// if running or jumping - 现在，我们在跑或跳
-		//1、reset initial aim rotation to the current actual aim rotation
-		//2、A0_Yaw = 0
-		//3、We also need a Movement Offset Yaw to feed to our strafing blendspaces.
-		//4、Get Base Aim Rotation
-		//5、Get our Movement Rotation - this is the rotation of our Velocity
-		//6、Movement Offset Yaw = the delta between our movement rotation and our aim rotation.
-		//7、TurningStatus = NotTurning
+		//3、StartingAimRotation initially set in BeginPlay
+		//3、(initial aim rotation is calculated in BeginPlay)
+		
+		//4、Store the Yaw of the delta aim rotation (AO_Yaw)
+		//4、拿到插值后，把它存进瞄准偏移里
+		AO_Yaw = DeltaAimRotation.Yaw;
+
+		//5、if Turningstatus == NotTurning
+		if (TurningStatus == ETurningInPlace::NotTurning)
+		{
+			//5.1、Set InterpA0_Yaw to A0_Yaw
+			//5.1、要用InterpA0_Yaw把瞄准偏移的航向值慢慢归零
+			InterpA0_Yaw = AO_Yaw;
+		}
+			
+		//6、TurnInPlace() - interpolates the InterpAo_Yaw value to zero.
+		TurnInPlace(DeltaTime);
+	}
+
+	// 跑或者跳跃 if running or jumping
+	if (Speed > 0.f || bIsInAir)
+	{
+		// reset initial aim rotation to the current actual aim rotation
+		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		AO_Yaw = 0;
+
+		// 需要一个移动偏移俯仰角，提供给侧移混合空间使用-We also need a Movement Offset Yaw to feed to our strafing blendspaces.
+		// Get Base Aim Rotation
+		FRotator AimRotation = GetBaseAimRotation();
+		// Get our Movement Rotation - this is the rotation of our Velocity
+		FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(GetVelocity());
+
+		// Movement Offset Yaw = the delta between our movement rotation and our aim rotation.
+		// 运动偏移俯仰差值 = 运动旋转与瞄准旋转之间的差值
+		MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation).Yaw;
+		TurningStatus = ETurningInPlace::NotTurning;
+	}
+
+	// 确保 AO_Yaw 不会反转
+	AO_Yaw *= -1.f;
 }
 
-// 原地转向函数执行步骤：
-// Turn In Place
-	//1、if AO_Yaw > 90
-		// Turningstatus = Right
-	//2、else if AO_Yaw > -90
-		// Turningstatus = Left
-	//3、if TurningStatus != NotTurning (in other words, we are turning left or right)
-		//3.1、Interpolate InterpA0_Yaw down to zero.
-		//3.2、A0_Yaw = InterpA0_Yaw
-		//3.3、if Abs(A0_Yaw) < 5.f
-			//3.3.1、 Turningstatus = NotTurning
-			//3.3.2、 reset initial aim rotation to our actual aim rotation
+void AShooterCharacter::TurnInPlace(float DeltaTime)
+{
+	if (AO_Yaw > 90.f)
+	{
+		TurningStatus = ETurningInPlace::Right;
+	}
+	else if (AO_Yaw < -90.f)
+	{
+		TurningStatus = ETurningInPlace::Left;
+	}
+	
+	if (TurningStatus != ETurningInPlace::NotTurning) // 正在左转或右转
+	{
+		// Interpolate InterpA0_Yaw down to zero.
+		InterpA0_Yaw = FMath::FInterpTo(InterpA0_Yaw, 0.f, DeltaTime, 4.0f);
+		AO_Yaw = InterpA0_Yaw;
+		if (FMath::Abs(AO_Yaw) < 5.f)
+		{
+			TurningStatus = ETurningInPlace::NotTurning;
+			
+			// reset initial aim rotation to our actual aim rotation
+			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		}
+	}
+}
 
 void AShooterCharacter::CalculateFABRIKSocketTransform()
 {

@@ -71,7 +71,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "FPS|TurnInPlace")
 	float AO_Yaw;
 
-	// 移动偏移俯仰角差值
+	// 移动偏移俯仰角差值,是用来做横向移动的
 	UPROPERTY(BlueprintReadOnly, Category = "FPS|Strafing")
 	float MovementOffsetYaw;
 

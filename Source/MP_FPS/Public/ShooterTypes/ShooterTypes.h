@@ -11,6 +11,6 @@ UENUM(BlueprintType)
 enum class ETurningInPlace : uint8
 {
 	Left UMETA(DisplayName = "TuringLeft"),
-	Right UMETA(DisplayName = "TuringLeft"),
+	Right UMETA(DisplayName = "TuringRight"),
 	NotTurning UMETA(DisplayName = "NotTurning")
 };

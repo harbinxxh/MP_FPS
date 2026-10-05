@@ -176,14 +176,14 @@ void AShooterCharacter::CalculateTurnInPlaceParameters(float DeltaTime)
 		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		AO_Yaw = 0;
 
-		// 需要一个移动偏移俯仰角，提供给侧移混合空间使用-We also need a Movement Offset Yaw to feed to our strafing blendspaces.
+		// 需要一个移动偏移角，提供给侧移混合空间使用-We also need a Movement Offset Yaw to feed to our strafing blendspaces.
 		// Get Base Aim Rotation
 		FRotator AimRotation = GetBaseAimRotation();
 		// Get our Movement Rotation - this is the rotation of our Velocity
 		FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(GetVelocity());
 
 		// Movement Offset Yaw = the delta between our movement rotation and our aim rotation.
-		// 运动偏移俯仰差值 = 运动旋转与瞄准旋转之间的差值
+		// 运动偏移差值 = 运动旋转与瞄准旋转之间的差值
 		MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation).Yaw;
 		TurningStatus = ETurningInPlace::NotTurning;
 	}

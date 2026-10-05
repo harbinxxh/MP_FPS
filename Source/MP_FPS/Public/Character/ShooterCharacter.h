@@ -67,11 +67,11 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnAim(bool bIsAiming);
 
-	// 瞄准旋转差值的水平分量
+	// 瞄准航向旋转差值的水平分量
 	UPROPERTY(BlueprintReadOnly, Category = "FPS|TurnInPlace")
 	float AO_Yaw;
 
-	// 移动偏移俯仰角差值,是用来做横向移动的
+	// 移动偏移航向角差值,是用来做横向移动的
 	UPROPERTY(BlueprintReadOnly, Category = "FPS|Strafing")
 	float MovementOffsetYaw;
 

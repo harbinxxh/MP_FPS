@@ -75,6 +75,27 @@ struct FPlayerAnims
 	// 等到了要播放换弹、切枪、射击这类蒙太奇时在添加
 };
 
+
+// 蒙太奇数据结构体: 包括装备、换弹和射击三类动画蒙太奇
+USTRUCT(BlueprintType)
+struct FMontageData
+{
+	GENERATED_BODY()
+
+	// 装备蒙太奇
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> EquipMontage = nullptr;
+
+	// 换弹蒙太奇
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> ReloadMontage = nullptr;
+
+	// 射击蒙太奇
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> FireMontage = nullptr;
+};
+
+
 /**
  * 
  */
@@ -97,6 +118,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|WeaponData|Weapons")
 	TMap<FGameplayTag, FName> GripPoints;
 
+	// 武器蒙太奇
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|WeaponData|Weapons")
+	TMap<FGameplayTag, FMontageData> WeaponMontages;
+
 	// 第一人称动画
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|WeaponData|FirstPerson")
 	TMap<FGameplayTag, FPlayerAnims> FirstPersonAnims;
@@ -104,4 +129,12 @@ public:
 	// 第三人称动画
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|WeaponData|ThirdPerson")
 	TMap<FGameplayTag, FPlayerAnims> ThirdPersonAnims;
+
+	// 第一人称蒙太奇
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|WeaponData|FirstPerson")
+	TMap<FGameplayTag, FMontageData> FirstPersonMontages;
+
+	// 第三人称蒙太奇
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|WeaponData|ThirdPerson")
+	TMap<FGameplayTag, FMontageData> ThirdPersonMontages;
 };

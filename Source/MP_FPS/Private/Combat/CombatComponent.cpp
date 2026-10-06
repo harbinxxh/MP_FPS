@@ -5,6 +5,10 @@
 #include "Engine/Engine.h"
 #include "Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
+#include "Animation/AnimMontage.h"
+#include "Data/WeaponData.h"
+#include "Interfaces/PlayerInterface.h"
+
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -40,7 +44,54 @@ void UCombatComponent::Initiate_CycleWeapon()
 
 void UCombatComponent::Initiate_FireWeapon_Pressed()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, TEXT("Initiate_FireWeapon_Pressed"), false);
+	 Local_FireWeapon();
+}
+
+void UCombatComponent::Local_FireWeapon()
+{
+	ensure(IsValid(WeaponData));
+
+	// 获取第一人称开火蒙太奇 - play the fire weapon montage for the first-person meshs
+	UAnimMontage* Montage1P = WeaponData->FirstPersonMontages.FindChecked(CurrentWeapon->WeaponType).FireMontage;
+
+	// 需要获取拥有者的第一人称网格
+	USkeletalMeshComponent* Mesh1P = IPlayerInterface::Execute_GetMesh1P(GetOwner());
+	
+	if (IsValid(Montage1P) && IsValid(Mesh1P))
+	{
+		// 播放蒙太奇
+		Mesh1P->GetAnimInstance()->Montage_Play(Montage1P);
+	}
+
+	// 通知服务器，已执行开枪操作
+	 Server_FireWeapon();
+}
+
+void UCombatComponent::Server_FireWeapon_Implementation()
+{
+	Multicast_FileWeapon();
+}
+
+void UCombatComponent::Multicast_FileWeapon_Implementation()
+{
+	APawn* OwningPawn = Cast<APawn>(GetOwner());
+	if (OwningPawn->IsLocallyControlled())
+	{
+		// do locally-controlled stuff.
+		// 最终我们发射时要在本地处理多播相关的逻辑，这涉及让武器执行具体操作
+	}
+	else
+	{
+		ensure(IsValid(WeaponData));
+
+		UAnimMontage* Montage3P = WeaponData->ThirdPersonMontages.FindChecked(CurrentWeapon->WeaponType).FireMontage;
+		USkeletalMeshComponent* Mesh3P = IPlayerInterface::Execute_GetMesh3P(GetOwner());
+		if (IsValid(Montage3P) && IsValid(Mesh3P))
+		{
+			// 播放第三人称开火蒙太奇
+			Mesh3P->GetAnimInstance()->Montage_Play(Montage3P);
+		}
+	}
 }
 
 void UCombatComponent::Initiate_FireWeapon_Released()

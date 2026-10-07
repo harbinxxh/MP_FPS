@@ -3,6 +3,9 @@
 
 #include "Weapon/Weapon.h"
 #include "Interfaces/PlayerInterface.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "MP_FPS/MP_FPS.h"
+#include "KismetTraceUtils.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -36,6 +39,7 @@ AWeapon::AWeapon()
 	Mesh3P->SetHiddenInGame(true);
 
 	AimFieldView = 65.0f;
+	TraceRadius = 5.f;
 }
 
 // 在 OnRep_Instigator() 函数里，调用 AttachToOwningPawn() 函数，为玩家角色绑定武器
@@ -56,6 +60,60 @@ USkeletalMeshComponent* AWeapon::GetMesh1P() const
 USkeletalMeshComponent* AWeapon::GetMesh3P() const
 {
 	return Mesh3P;
+}
+
+void AWeapon::WeaponTrace(FHitResult& OutHit, float TraceLength)
+{
+	FCollisionQueryParams QueryParams;
+	QueryParams.bReturnPhysicalMaterial = true;
+	QueryParams.AddIgnoredActor(GetOwner());
+
+	// 设置碰撞的具体行为
+	FCollisionResponseParams ResponseParams;
+	ResponseParams.CollisionResponse.SetAllChannels(ECR_Ignore);
+	ResponseParams.CollisionResponse.SetResponse(ECC_Pawn, ECR_Block);
+	ResponseParams.CollisionResponse.SetResponse(ECC_WorldStatic, ECR_Block);
+	ResponseParams.CollisionResponse.SetResponse(ECC_WorldDynamic, ECR_Block);
+	ResponseParams.CollisionResponse.SetResponse(ECC_PhysicsBody, ECR_Block);
+
+	// 确保获取到发起者
+	ensure(GetInstigator());
+	if (APlayerController* PC = Cast<APlayerController>(GetInstigator()->GetController()); IsValid(PC))
+	{
+		// 获取角色眼睛的位置和朝向
+		FVector EyesWorldLocation;
+		FRotator EyesWorldRotation;
+		PC->GetActorEyesViewPoint(EyesWorldLocation, EyesWorldRotation);
+		const FVector EyesWorldDirection = UKismetMathLibrary::GetForwardVector(EyesWorldRotation);
+
+		// 用角色眼睛的位置，作为射线检测的起点
+		const FVector Start = EyesWorldLocation;
+		const FVector End = Start + EyesWorldDirection * TraceLength;
+
+		// 用指定通道（Channel），在场景中扫掠一个形状（Shape），并返回第一个造成阻挡的命中结果。
+		// 用球形状，这样比简单的线性射线检测更容易命中，打中东西就更容易了
+		const bool bHit = GetWorld()->SweepSingleByChannel(
+			OutHit,
+			Start,
+			End,
+			FQuat::Identity,
+			FPSTraceChannels::ECC_Weapon,
+			FCollisionShape::MakeSphere(TraceRadius),
+			QueryParams,
+			ResponseParams);
+
+		DrawDebugSphereTraceSingle(
+			GetWorld(),
+			Start,
+			End,
+			TraceRadius,
+			EDrawDebugTrace::ForDuration,
+			bHit,
+			OutHit,
+			FColor::Green,
+			FColor::Red,
+			5.f);
+	}
 }
 
 /**

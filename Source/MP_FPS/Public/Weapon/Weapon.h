@@ -42,6 +42,9 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const;
 	USkeletalMeshComponent* GetMesh3P() const;
 
+	// 武器射线检测函数
+	void WeaponTrace(FHitResult& OutHit, float TraceLength);
+
 	// 把武器绑定到拥有者，也就是控制的Pawn上
 	void AttachToOwningPawn() const;
 
@@ -52,6 +55,10 @@ public:
 	// 武器瞄准视野值
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Aiming")
 	float AimFieldView;
+
+	// 球体半径
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Trace")
+	float TraceRadius;
 
 protected:
 	virtual void BeginPlay() override;

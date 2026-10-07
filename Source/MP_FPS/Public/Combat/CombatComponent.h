@@ -58,6 +58,9 @@ public:
 	TObjectPtr<AWeapon> CurrentWeapon;
 
 protected:
+	// 射线长度
+	UPROPERTY(EditDefaultsOnly, Category = "FPS|Weapon")
+	float TraceLength;
 
 private:
 	/**

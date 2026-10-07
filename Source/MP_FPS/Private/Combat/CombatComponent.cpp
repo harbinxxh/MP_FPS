@@ -14,7 +14,7 @@
 UCombatComponent::UCombatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
+	TraceLength = 20000;
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -49,6 +49,8 @@ void UCombatComponent::Initiate_FireWeapon_Pressed()
 
 void UCombatComponent::Local_FireWeapon()
 {
+	// 先判断:如果当前武器无效，直接返回
+	if (!IsValid(CurrentWeapon)) return;
 	ensure(IsValid(WeaponData));
 
 	// 获取第一人称开火蒙太奇 - play the fire weapon montage for the first-person meshs
@@ -62,6 +64,10 @@ void UCombatComponent::Local_FireWeapon()
 		// 播放蒙太奇
 		Mesh1P->GetAnimInstance()->Montage_Play(Montage1P);
 	}
+
+	// 获取命中结果
+	FHitResult Hit;
+	CurrentWeapon->WeaponTrace(Hit, TraceLength);
 
 	// 通知服务器，已执行开枪操作
 	 Server_FireWeapon();

@@ -102,6 +102,11 @@ void AWeapon::WeaponTrace(FHitResult& OutHit, float TraceLength)
 			QueryParams,
 			ResponseParams);
 
+		if (!bHit)
+		{
+			OutHit.ImpactPoint = End; // 如果未击中，就将击中点设为 End 点，也就是射线末端
+		}
+
 		//DrawDebugSphereTraceSingle(
 		//	GetWorld(),
 		//	Start,

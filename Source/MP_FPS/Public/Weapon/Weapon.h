@@ -76,17 +76,16 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void FireEffects(const FVector& ImpactPoint, const FVector& ImpactNormal, EPhysicalSurface ImpactSurfaceType, bool bIsFirstPerson);
 
-private:
-
 	// Mesh1P 和 Mesh3P 在两种视角下会呈现两套不同的武器
-	
 	// WeaponMesh: 1st person view
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Weapon")
 	TObjectPtr<USkeletalMeshComponent> Mesh1P;
 
 	// WeaponMesh: 3rd person view
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Weapon")
 	TObjectPtr<USkeletalMeshComponent> Mesh3P;
+
+private:
 
 	// 设置玩家角色网格的可见性
 	void SetMeshVisibilities(APawn* OwningPawn) const;

@@ -94,11 +94,11 @@ private:
 
 	// 通知服务器，已执行开枪操作
 	UFUNCTION(Server, Reliable)
-	void Server_FireWeapon();
+	void Server_FireWeapon(const FHitResult& Hit);
 
 	// 服务器调用多播代理时，客户端每台机器都会执行多播 RPC
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_FileWeapon();
+	void Multicast_FileWeapon(const FHitResult& Hit);
 
 	// 用来处理瞄准 bAiming 变量
 	void Local_Aim(bool bPressed);

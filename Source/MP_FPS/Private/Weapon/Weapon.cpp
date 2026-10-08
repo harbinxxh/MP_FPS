@@ -102,17 +102,17 @@ void AWeapon::WeaponTrace(FHitResult& OutHit, float TraceLength)
 			QueryParams,
 			ResponseParams);
 
-		DrawDebugSphereTraceSingle(
-			GetWorld(),
-			Start,
-			End,
-			TraceRadius,
-			EDrawDebugTrace::ForDuration,
-			bHit,
-			OutHit,
-			FColor::Green,
-			FColor::Red,
-			5.f);
+		//DrawDebugSphereTraceSingle(
+		//	GetWorld(),
+		//	Start,
+		//	End,
+		//	TraceRadius,
+		//	EDrawDebugTrace::ForDuration,
+		//	bHit,
+		//	OutHit,
+		//	FColor::Green,
+		//	FColor::Red,
+		//	5.f);
 	}
 }
 
@@ -139,6 +139,13 @@ void AWeapon::AttachToOwningPawn() const
 	// 3.虽说同时绑定到PawnMesh1P、PawnMesh3P上，但是当某个网格不可见时，绑定就会失败
 	Mesh1P->AttachToComponent(PawnMesh1P, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
 	Mesh3P->AttachToComponent(PawnMesh3P, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
+}
+
+void AWeapon::Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal, TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson)
+{
+	// local fire stuff...
+	FireEffects(ImpactPoint, ImpactNormal, ImpactSurfaceType, bIsFirstPerson);
+
 }
 
 void AWeapon::BeginPlay()

@@ -69,16 +69,20 @@ void UCombatComponent::Local_FireWeapon()
 	FHitResult Hit;
 	CurrentWeapon->WeaponTrace(Hit, TraceLength);
 
+	// 获取表面类型
+	EPhysicalSurface ImpactSurfaceType = Hit.PhysMaterial.IsValid(false) ? Hit.PhysMaterial->SurfaceType.GetValue() : SurfaceType1;
+	CurrentWeapon->Local_Fire(Hit.ImpactPoint, Hit.ImpactNormal, ImpactSurfaceType, true);
+
 	// 通知服务器，已执行开枪操作
-	 Server_FireWeapon();
+	 Server_FireWeapon(Hit);
 }
 
-void UCombatComponent::Server_FireWeapon_Implementation()
+void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& Hit)
 {
-	Multicast_FileWeapon();
+	Multicast_FileWeapon(Hit);
 }
 
-void UCombatComponent::Multicast_FileWeapon_Implementation()
+void UCombatComponent::Multicast_FileWeapon_Implementation(const FHitResult& Hit)
 {
 	APawn* OwningPawn = Cast<APawn>(GetOwner());
 	if (OwningPawn->IsLocallyControlled())
@@ -89,6 +93,10 @@ void UCombatComponent::Multicast_FileWeapon_Implementation()
 	else
 	{
 		ensure(IsValid(WeaponData));
+
+		// 获取表面类型
+		EPhysicalSurface ImpactSurfaceType = Hit.PhysMaterial.IsValid(false) ? Hit.PhysMaterial->SurfaceType.GetValue() : SurfaceType1;
+		CurrentWeapon->Local_Fire(Hit.ImpactPoint, Hit.ImpactNormal, ImpactSurfaceType, true);
 
 		UAnimMontage* Montage3P = WeaponData->ThirdPersonMontages.FindChecked(CurrentWeapon->WeaponType).FireMontage;
 		USkeletalMeshComponent* Mesh3P = IPlayerInterface::Execute_GetMesh3P(GetOwner());

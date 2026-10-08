@@ -60,8 +60,21 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Trace")
 	float TraceRadius;
 
+	/**
+	 * ImpactPoint：击中点
+	 * ImpactNormal：击中法线
+	 * ImpactSurfaceType：物理表面，这样外观效果就能基于这个物理表面来决定
+	 * bIsFirstPerson：布尔值，来判断是不是第一人称网格
+	 * 让武器在本地执行操作-不是指本地控制，而是指只在当前这台机器上运行，不会把动作同步给其他玩家
+	 */
+	void Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal,  TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson);
+
 protected:
 	virtual void BeginPlay() override;
+
+	// 在蓝图中处理外观相关的逻辑
+	UFUNCTION(BlueprintImplementableEvent)
+	void FireEffects(const FVector& ImpactPoint, const FVector& ImpactNormal, EPhysicalSurface ImpactSurfaceType, bool bIsFirstPerson);
 
 private:
 

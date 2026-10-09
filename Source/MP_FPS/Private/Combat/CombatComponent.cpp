@@ -14,7 +14,10 @@
 UCombatComponent::UCombatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	
 	TraceLength = 20000;
+	bAiming = false;
+	bTriggerPressed = false;
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -44,6 +47,7 @@ void UCombatComponent::Initiate_CycleWeapon()
 
 void UCombatComponent::Initiate_FireWeapon_Pressed()
 {
+	bTriggerPressed = true;
 	 Local_FireWeapon();
 }
 
@@ -73,8 +77,22 @@ void UCombatComponent::Local_FireWeapon()
 	EPhysicalSurface ImpactSurfaceType = Hit.PhysMaterial.IsValid(false) ? Hit.PhysMaterial->SurfaceType.GetValue() : SurfaceType1;
 	CurrentWeapon->Local_Fire(Hit.ImpactPoint, Hit.ImpactNormal, ImpactSurfaceType, true);
 
+	// 设置开火间隔定时器
+	// 通过设置的 FireTime 时间，也就是 0.1秒触发下一次射击
+	GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ThisClass::FireTimerFinished, CurrentWeapon->FireTime);
+
 	// 通知服务器，已执行开枪操作
 	 Server_FireWeapon(Hit);
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (!IsValid(CurrentWeapon)) return;
+
+	if (bTriggerPressed && CurrentWeapon->FireType == EFireType::Auto)
+	{
+		Local_FireWeapon();
+	}
 }
 
 void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& Hit)
@@ -110,7 +128,7 @@ void UCombatComponent::Multicast_FileWeapon_Implementation(const FHitResult& Hit
 
 void UCombatComponent::Initiate_FireWeapon_Released()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, TEXT("Initiate_FireWeapon_Released"), false);
+	bTriggerPressed = false;
 }
 
 void UCombatComponent::Initiate_ReloadWeapon()

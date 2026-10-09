@@ -40,6 +40,7 @@ AWeapon::AWeapon()
 
 	AimFieldView = 65.0f;
 	TraceRadius = 5.f;
+	FireTime = 0.1f;
 }
 
 // 在 OnRep_Instigator() 函数里，调用 AttachToOwningPawn() 函数，为玩家角色绑定武器

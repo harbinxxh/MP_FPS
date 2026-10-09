@@ -7,6 +7,16 @@
 #include "GameplayTagContainer.h"
 #include "Weapon.generated.h"
 
+
+// 全自动射击和半自动射击
+UENUM(BlueprintType)
+enum class EFireType : uint8
+{
+	Auto UMETA(DisplayName = "Automatic"),
+	SemiAuto UMETA(DisplayName = "SemiAutomatic")
+};
+
+
 UCLASS()
 class MP_FPS_API AWeapon : public AActor
 {
@@ -59,6 +69,14 @@ public:
 	// 球体半径
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Trace")
 	float TraceRadius;
+
+	// 全自动射击和半自动射击
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FPS|FirType")
+	EFireType FireType;
+
+	// 武器发射间隔时长
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FPS|FirType")
+	float FireTime;
 
 	/**
 	 * ImpactPoint：击中点

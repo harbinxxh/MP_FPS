@@ -63,6 +63,13 @@ protected:
 	float TraceLength;
 
 private:
+
+	// 是否一直在触发枪的扳机
+	bool bTriggerPressed;
+	// 设置多长的持续时间，就是全自动射击时武器的发射间隔是多长
+	FTimerHandle FireTimer;
+	void FireTimerFinished();
+
 	/**
 	* 复制通知函数：在C++中，如果你在服务器上修改复制变量，那么只会在客户端触发 RepNotify 复制通知函数
 	* 复制通知函数：能接收变量类型参数，这样就能得到该变量的前值，也就是复制前的值，有时候需要这个信息时特别实用

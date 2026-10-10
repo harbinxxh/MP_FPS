@@ -86,6 +86,31 @@ public:
 	 * 让武器在本地执行操作-不是指本地控制，而是指只在当前这台机器上运行，不会把动作同步给其他玩家
 	 */
 	void Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal,  TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson);
+	
+
+	/**
+	 * 客户端预测模型：
+	 * 客户端预测逻辑，也只在本地控制时才生效
+	 * 客户端预测模型，变量是不会被复制的
+	 */
+	//-----------------------------------------------------
+	// 只在服务器上触发
+	void Auth_Fire();
+	// 客户端预测算法函数
+	void Rep_Fire(int32 AuthAmmo);
+	
+	// 弹匣容量
+	UPROPERTY(EditAnywhere, Category = "FPS|Ammo")
+	int32 MagCapacity;
+	
+	// 弹药数量
+	UPROPERTY(EditAnywhere, Category = "FPS|Ammo")
+	int32 Ammo;
+
+	// 初始弹药数量
+	UPROPERTY(EditAnywhere, Category = "FPS|Ammo")
+	int32 StartingCarriedAmmo;
+	//-----------------------------------------------------
 
 protected:
 	virtual void BeginPlay() override;
@@ -108,4 +133,6 @@ private:
 	// 设置玩家角色网格的可见性
 	void SetMeshVisibilities(APawn* OwningPawn) const;
 
+	// 客户端预测中用来追踪操作顺序的计数器
+	int32 Sequence;
 };

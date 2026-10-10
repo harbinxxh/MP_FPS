@@ -47,8 +47,14 @@ void UCombatComponent::Initiate_CycleWeapon()
 
 void UCombatComponent::Initiate_FireWeapon_Pressed()
 {
+	if (!IsValid(CurrentWeapon)) return;
+
 	bTriggerPressed = true;
-	 Local_FireWeapon();
+
+	if (CurrentWeapon->Ammo > 0)
+	{
+		Local_FireWeapon();
+	}
 }
 
 void UCombatComponent::Local_FireWeapon()
@@ -89,7 +95,7 @@ void UCombatComponent::FireTimerFinished()
 {
 	if (!IsValid(CurrentWeapon)) return;
 
-	if (bTriggerPressed && CurrentWeapon->FireType == EFireType::Auto)
+	if (bTriggerPressed && CurrentWeapon->FireType == EFireType::Auto && CurrentWeapon->Ammo > 0)
 	{
 		Local_FireWeapon();
 	}
@@ -97,16 +103,28 @@ void UCombatComponent::FireTimerFinished()
 
 void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& Hit)
 {
-	Multicast_FileWeapon(Hit);
+	if (!IsValid(CurrentWeapon)) return;
+
+	// 只在特定条件下执行
+	// 1、不是 ListenServer 服务器，在监听服务器模式下且处于本地控制状态，那说明就是主机，而且我们就是触发本地开火的玩家，所以弹药已设为自身减一
+	// 2、检查是不是非本地控制，要确认这种情况下，所有者非本地控制，如果是本地控制，我们已经执行了本地开火操作
+	// 因此，这两种情形，都要过滤掉
+	if (GetNetMode() != NM_ListenServer || !Cast<APawn>(GetOwner())->IsLocallyControlled())
+	{
+		CurrentWeapon->Auth_Fire();
+	}
+
+	Multicast_FileWeapon(Hit, CurrentWeapon->Ammo);
 }
 
-void UCombatComponent::Multicast_FileWeapon_Implementation(const FHitResult& Hit)
+void UCombatComponent::Multicast_FileWeapon_Implementation(const FHitResult& Hit, int32 AuthAmmo)
 {
 	APawn* OwningPawn = Cast<APawn>(GetOwner());
 	if (OwningPawn->IsLocallyControlled())
 	{
-		// do locally-controlled stuff.
-		// 最终我们发射时要在本地处理多播相关的逻辑，这涉及让武器执行具体操作
+		// 最终要在本地控制处理多播相关的逻辑，这涉及让武器执行具体操作
+		// 弹药更新
+		CurrentWeapon->Rep_Fire(AuthAmmo);
 	}
 	else
 	{

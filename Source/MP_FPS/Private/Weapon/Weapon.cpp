@@ -41,6 +41,10 @@ AWeapon::AWeapon()
 	AimFieldView = 65.0f;
 	TraceRadius = 5.f;
 	FireTime = 0.1f;
+	MagCapacity = 10;
+	Ammo = 5;
+	StartingCarriedAmmo = 10;
+	Sequence = 0;
 }
 
 // 在 OnRep_Instigator() 函数里，调用 AttachToOwningPawn() 函数，为玩家角色绑定武器
@@ -147,11 +151,41 @@ void AWeapon::AttachToOwningPawn() const
 	Mesh3P->AttachToComponent(PawnMesh3P, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
 }
 
+/**
+ * 这个函数会在各种机器上本地执行，不只在你当前控制的那台机器上
+ * 确实在本地控制的机器上调用它，比如在响应玩家输入的时候
+ */
 void AWeapon::Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal, TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson)
 {
-	// local fire stuff...
 	FireEffects(ImpactPoint, ImpactNormal, ImpactSurfaceType, bIsFirstPerson);
 
+	// 只在自己拥有控制权时才这么做
+	// 只对本地控制的玩家执行弹药预测，只有本地控制的玩家才能看到自己有多少弹药
+	if (GetInstigator()->IsLocallyControlled())
+	{
+		// 限制范围就定在0到弹匣容量之间
+		// 本地:弹药数减一，序列值加一
+		Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
+		++Sequence;
+	}
+}
+
+void AWeapon::Auth_Fire()
+{
+	// 服务端:弹药数减一
+	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
+}
+
+void AWeapon::Rep_Fire(int32 AuthAmmo)
+{
+	// 只在拥有控制权时才执行
+	// 客户端：把弹药数设为 auth ammo，序列号减1，再根据序列号递减弹药
+	if (GetInstigator()->IsLocallyControlled())
+	{
+		Ammo = AuthAmmo;
+		--Sequence;
+		Ammo -= Sequence;
+	}
 }
 
 void AWeapon::BeginPlay()

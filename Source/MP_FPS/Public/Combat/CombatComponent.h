@@ -105,7 +105,7 @@ private:
 
 	// 服务器调用多播代理时，客户端每台机器都会执行多播 RPC
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_FileWeapon(const FHitResult& Hit);
+	void Multicast_FileWeapon(const FHitResult& Hit, int32 AuthAmmo);
 
 	// 用来处理瞄准 bAiming 变量
 	void Local_Aim(bool bPressed);

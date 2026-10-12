@@ -69,6 +69,7 @@ AShooterCharacter::AShooterCharacter()
 	// 角色默认视野值
 	DefaultFieldOfView = 90.0f;
 	TurningStatus = ETurningInPlace::NotTurning;
+	bWeaponFirstReplicated = false; // 它只用于记录客户端武器首次复制的时机
 }
 
 void AShooterCharacter::BeginPlay()
@@ -286,6 +287,20 @@ USkeletalMeshComponent* AShooterCharacter::GetMesh1P_Implementation() const
 USkeletalMeshComponent* AShooterCharacter::GetMesh3P_Implementation() const
 {
 	return GetMesh();
+}
+
+/**
+ * 执行步骤：
+ * 当武器被复制到客户端时，战斗组件会在射击角色身上调用这个函数，
+ * 射击角色接着会检查，是否还未首次复制该武器
+ */
+void AShooterCharacter::WeaponReplicated_Implementation()
+{
+	if (!bWeaponFirstReplicated)
+	{
+		bWeaponFirstReplicated = true;
+		OnWeaponFirstReplicated.Broadcast(Combat->CurrentWeapon);
+	}
 }
 
 void AShooterCharacter::Input_CycleWeapon()

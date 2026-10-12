@@ -240,6 +240,7 @@ void UCombatComponent::OnRep_CurrentWeapon(AWeapon* LastWeapon)
 {
 	if (!IsValid(CurrentWeapon)) return;
 	CurrentWeapon->AttachToOwningPawn();
+	IPlayerInterface::Execute_WeaponReplicated(GetOwner());
 
 	/**
 	* 还需要在Weapon类中的OnRep_Instigator()函数里完成这个操作

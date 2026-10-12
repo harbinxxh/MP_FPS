@@ -13,6 +13,11 @@ class UCameraComponent;
 class UCombatComponent;
 class UInputAction;
 
+// 定义一个委托，用来在武器首次复制时触发广播
+// 声明一个动态多播委托，带一个参数（这个参数就是刚复制完成的武器）
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponFirstReplicated, AWeapon*, Weapon);
+
+
 UCLASS()
 class MP_FPS_API AShooterCharacter : public ACharacter, public IPlayerInterface
 {
@@ -33,6 +38,7 @@ public:
 	virtual FName GetWeaponAttachPoint_Implementation(const FGameplayTag& WeaponType) const override;
 	virtual USkeletalMeshComponent* GetMesh1P_Implementation() const;
 	virtual USkeletalMeshComponent* GetMesh3P_Implementation() const;
+	virtual void WeaponReplicated_Implementation() override;
 	/** ~PlayerInterface */
 
 	virtual void BeginPlay() override;
@@ -49,6 +55,12 @@ public:
 	// 判断当前玩家是否有武器
 	UFUNCTION(BlueprintCallable)
 	bool HasCurrentWeapon() const;
+
+	// 支持蓝图绑定事件，如果有控件需要，可以在蓝图里绑定这个事件
+	UPROPERTY(BlueprintAssignable)
+	FWeaponFirstReplicated OnWeaponFirstReplicated;
+
+	bool HasWeaponFirstReplicated() const { return bWeaponFirstReplicated; }
 
 protected:
 	// BlueprintReadOnly 默认不能作用于 private 私有成员内
@@ -101,6 +113,8 @@ private:
 	// 原地旋转函数
 	void TurnInPlace(float DeltaTime);
 
+	// 记录武器是否已首次复制
+	bool bWeaponFirstReplicated;
 	// 起始瞄准旋转
 	FRotator StartingAimRotation;
 	// 插值变量：专门负责插值处理

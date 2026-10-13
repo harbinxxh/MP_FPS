@@ -12,6 +12,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UCombatComponent;
 class UInputAction;
+class AWeapon;
 
 // 定义一个委托，用来在武器首次复制时触发广播
 // 声明一个动态多播委托，带一个参数（这个参数就是刚复制完成的武器）
@@ -39,6 +40,7 @@ public:
 	virtual USkeletalMeshComponent* GetMesh1P_Implementation() const;
 	virtual USkeletalMeshComponent* GetMesh3P_Implementation() const;
 	virtual void WeaponReplicated_Implementation() override;
+	virtual AWeapon* GetCurrentWeapon_Implementation() override;
 	/** ~PlayerInterface */
 
 	virtual void BeginPlay() override;
@@ -56,7 +58,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool HasCurrentWeapon() const;
 
-	// 支持蓝图绑定事件，如果有控件需要，可以在蓝图里绑定这个事件
+	// OnWeaponFirstReplicated：当客户端首次接收到武器副本时，该委托就会触发并把武器实例广播出去
+	// BlueprintAssignable：支持蓝图绑定事件，如果有控件需要，可以在蓝图里绑定这个事件
 	UPROPERTY(BlueprintAssignable)
 	FWeaponFirstReplicated OnWeaponFirstReplicated;
 

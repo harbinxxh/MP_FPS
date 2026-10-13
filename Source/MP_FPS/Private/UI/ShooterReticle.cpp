@@ -3,13 +3,15 @@
 
 #include "UI/ShooterReticle.h"
 #include "Character/ShooterCharacter.h"
+#include "Combat/CombatComponent.h"
+#include "Weapon/Weapon.h"
 
 
 void UShooterReticle::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	// 当被控制的棋子发生变更时，会调用该委托
+	// 当Controller控制的Pawn发生变更时，会调用该委托
 	GetOwningPlayer()->OnPossessedPawnChanged.AddDynamic(this, &ThisClass::OnPossessedPawnChanged);
 
 	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(GetOwningPlayer()->GetPawn());
@@ -20,6 +22,12 @@ void UShooterReticle::NativeOnInitialized()
 	if (ShooterCharacter->HasWeaponFirstReplicated())
 	{
 		// Get Dynamic Material Instances from the Weapon.
+		AWeapon* Weapon = IPlayerInterface::Execute_GetCurrentWeapon(ShooterCharacter);
+		if (IsValid(Weapon))
+		{
+			OnReticleChanged(Weapon->GetReticleDynamicMaterialInstance());
+			OnAmmoCounterChanged(Weapon->GetAmmoCounterDynamicMaterialInstance(), Weapon->Ammo, Weapon->MagCapacity);
+		}
 	}
 	else
 	{
@@ -33,12 +41,37 @@ void UShooterReticle::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 void UShooterReticle::OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn)
 {
-	// 这些事件应该影响瞄准器的外观效果
+	// 瞄准器的外观效果
 	// Unbind from delegates on the oldPawn's Combat Component
+	UCombatComponent* OldPawnCombat = UCombatComponent::FindCombatComponent(OldPawn);
+	if (IsValid(OldPawnCombat))
+	{
+		OldPawnCombat->OnReticleChanged.RemoveDynamic(this, &ThisClass::OnReticleChanged);
+		OldPawnCombat->OnAmmoCounterChanged.RemoveDynamic(this, &ThisClass::OnAmmoCounterChanged);
+	}
+
 	// Bind to delegates on the New Pawn's Combat Component
+	UCombatComponent* NewPawnCombat = UCombatComponent::FindCombatComponent(NewPawn);
+	if (IsValid(NewPawnCombat))
+	{
+		NewPawnCombat->OnReticleChanged.AddDynamic(this, &ThisClass::OnReticleChanged);
+		NewPawnCombat->OnAmmoCounterChanged.AddDynamic(this, &ThisClass::OnAmmoCounterChanged);
+	}
 }
 
 void UShooterReticle::OnWeaponFirstReplicated(AWeapon* Weapon)
 {
 	// Get Dynamic Material Instances from the Weapon.
+	OnReticleChanged(Weapon->GetReticleDynamicMaterialInstance());
+	OnAmmoCounterChanged(Weapon->GetAmmoCounterDynamicMaterialInstance(), Weapon->Ammo, Weapon->MagCapacity);
+}
+
+void UShooterReticle::OnReticleChanged(UMaterialInstanceDynamic* ReticleDynMatInst)
+{
+	// Set the material on the actual reticle widget to the dyn mat inst
+}
+
+void UShooterReticle::OnAmmoCounterChanged(UMaterialInstanceDynamic* AmmoCounterDynMatInst, int32 RoundsCurrent, int32 RoundsMax)
+{
+	// Set the material on the actual ammo counter widget to the dyn mat inst
 }

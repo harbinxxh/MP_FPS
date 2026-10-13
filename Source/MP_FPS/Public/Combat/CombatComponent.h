@@ -9,6 +9,10 @@
 class UWeaponData;
 class AWeapon;
 
+// 在第一次装备武器或切换武器时，广播材质
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FReticleChanged, UMaterialInstanceDynamic*, ReticleDynMatInst);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAmmoCounterChanged, UMaterialInstanceDynamic*, AmmoCounterDynMatInst, int32, RoundsCurrent, int32, RoundsMax);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MP_FPS_API UCombatComponent : public UActorComponent
 {
@@ -19,6 +23,11 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	// 返回战斗组件
+	// BlueprintPure: C++和蓝图都可以调用
+	UFUNCTION(BlueprintPure, Category = "FPS|Comba")
+	static UCombatComponent* FindCombatComponent(const AActor* Actor) { return ( IsValid(Actor) ? Actor->FindComponentByClass<UCombatComponent>() : nullptr); }
+
 	// Cycle to the next weapon in the inventory
 	void Initiate_CycleWeapon();		// 切换武器
 	void Initiate_FireWeapon_Pressed(); // 连续开火按下
@@ -26,6 +35,12 @@ public:
 	void Initiate_ReloadWeapon();		// 弹药装填
 	void Initiate_Aim_Pressed();		// 瞄准按下
 	void Initiate_Aim_Released();		// 瞄准释放
+
+	UPROPERTY(BlueprintAssignable)
+	FReticleChanged OnReticleChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FAmmoCounterChanged OnAmmoCounterChanged;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponData;
@@ -57,6 +72,9 @@ public:
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentWeapon)
 	TObjectPtr<AWeapon> CurrentWeapon;
 
+	// 初始化武器控件
+	void InitializeWeaponWidgets() const;
+
 protected:
 	// 射线长度
 	UPROPERTY(EditDefaultsOnly, Category = "FPS|Weapon")
@@ -71,9 +89,10 @@ private:
 	void FireTimerFinished();
 
 	/**
-	* 复制通知函数：在C++中，如果你在服务器上修改复制变量，那么只会在客户端触发 RepNotify 复制通知函数
-	* 复制通知函数：能接收变量类型参数，这样就能得到该变量的前值，也就是复制前的值，有时候需要这个信息时特别实用
-	* 复制通知函数：必须是 UFUNCTION() 标识，因为必须通过反射系统暴露，才能与对应的复制变量绑定
+	* 复制通知函数：当武器变量被修改时，就触发 RepNotify 复制通知函数
+	* 在C++中，如果你在服务器上修改复制变量，那么只会在客户端触发 RepNotify 复制通知函数
+	* 能接收变量类型参数，这样就能得到该变量的前值，也就是复制前的值，有时候需要这个信息时特别实用
+	* 必须是 UFUNCTION() 标识，因为必须通过反射系统暴露，才能与对应的复制变量绑定
 	*/
 	UFUNCTION()
 	void OnRep_CurrentWeapon(AWeapon* LastWeapon);

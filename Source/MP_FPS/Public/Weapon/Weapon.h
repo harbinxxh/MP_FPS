@@ -51,6 +51,8 @@ public:
 
 	USkeletalMeshComponent* GetMesh1P() const;
 	USkeletalMeshComponent* GetMesh3P() const;
+	UMaterialInstanceDynamic* GetReticleDynamicMaterialInstance();
+	UMaterialInstanceDynamic* GetAmmoCounterDynamicMaterialInstance();
 
 	// 武器射线检测函数
 	void WeaponTrace(FHitResult& OutHit, float TraceLength);
@@ -135,4 +137,18 @@ private:
 
 	// 客户端预测中用来追踪操作顺序的计数器
 	int32 Sequence;
+	
+	// 给准星加材质，这些材质可以在武器蓝图的细节面板里设置的材质
+	UPROPERTY(EditDefaultsOnly, Category = "FPS|Weapon")
+	TObjectPtr<UMaterialInstance> ReticleMaterial;
+
+	// 给弹药计数器加材质
+	UPROPERTY(EditDefaultsOnly, Category = "FPS|Weapon")
+	TObjectPtr<UMaterialInstance> AmmoCounterMaterial;
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> DynMatInst_Reticle;
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> DynMatInst_AmmoCounter;
 };

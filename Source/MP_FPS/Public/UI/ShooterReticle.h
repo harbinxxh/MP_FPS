@@ -35,10 +35,17 @@ private:
 	TWeakObjectPtr<UMaterialInstanceDynamic> CurrentReticle_DynMatInst;
 	TWeakObjectPtr<UMaterialInstanceDynamic> CurrentAmmoCounter_DynMatInst;
 
-	// 当控制的操控Pawn变更时触发的委托
+	// 当Controller操控的Pawn变更时触发的委托
 	UFUNCTION()
 	void OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn);
 
 	UFUNCTION()
 	void OnWeaponFirstReplicated(AWeapon* Weapon);
+
+	// 准星和弹药数量代理回调函数
+	UFUNCTION()
+	void OnReticleChanged(UMaterialInstanceDynamic* ReticleDynMatInst);
+
+	UFUNCTION()
+	void OnAmmoCounterChanged(UMaterialInstanceDynamic* AmmoCounterDynMatInst, int32 RoundsCurrent, int32 RoundsMax);
 };

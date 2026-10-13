@@ -7,10 +7,20 @@
 #include "Weapon/Weapon.h"
 #include "Components/Image.h"
 
+// 命名常量
+namespace Ammo
+{
+	const FName Rounds_Current = FName("Rounds_Current");
+	const FName Rounds_Max = FName("Rounds_Max");
+}
 
 void UShooterReticle::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+
+	// 控件的渲染不透明度设为 0.0
+	Image_Reticle->SetRenderOpacity(0.f);
+	Image_AmmoCounter->SetRenderOpacity(0.f);
 
 	// 当Controller控制的Pawn发生变更时，会调用该委托
 	GetOwningPlayer()->OnPossessedPawnChanged.AddDynamic(this, &ThisClass::OnPossessedPawnChanged);
@@ -68,6 +78,9 @@ void UShooterReticle::OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn)
 	UCombatComponent* NewPawnCombat = UCombatComponent::FindCombatComponent(NewPawn);
 	if (IsValid(NewPawnCombat))
 	{
+		// 控件的渲染不透明度设为 1.0
+		Image_Reticle->SetRenderOpacity(1.f);
+		Image_AmmoCounter->SetRenderOpacity(1.f);
 		NewPawnCombat->OnReticleChanged.AddDynamic(this, &ThisClass::OnReticleChanged);
 		NewPawnCombat->OnAmmoCounterChanged.AddDynamic(this, &ThisClass::OnAmmoCounterChanged);
 	}
@@ -97,6 +110,8 @@ void UShooterReticle::OnAmmoCounterChanged(UMaterialInstanceDynamic* AmmoCounter
 {
 	// Set the material on the actual ammo counter widget to the dyn mat inst
 	CurrentAmmoCounter_DynMatInst = AmmoCounterDynMatInst;
+	CurrentAmmoCounter_DynMatInst->SetScalarParameterValue(Ammo::Rounds_Current, RoundsCurrent);
+	CurrentAmmoCounter_DynMatInst->SetScalarParameterValue(Ammo::Rounds_Max, RoundsMax);
 
 	FSlateBrush Brush;
 	Brush.SetResourceObject(AmmoCounterDynMatInst);

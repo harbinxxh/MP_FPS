@@ -5,6 +5,7 @@
 #include "Character/ShooterCharacter.h"
 #include "Combat/CombatComponent.h"
 #include "Weapon/Weapon.h"
+#include "Components/Image.h"
 
 
 void UShooterReticle::NativeOnInitialized()
@@ -19,6 +20,10 @@ void UShooterReticle::NativeOnInitialized()
 
 	OnPossessedPawnChanged(nullptr, ShooterCharacter);
 
+	// 如果从监听服务器的主机或独立游戏的角度来考虑
+	// bWeaponFirstReplicated 是个布尔值，只有当武器完成复制后，才会在客户端被设置，
+	// 对于监听服务器的主机或独立运行的玩家，武器不会在主机或独立玩家端复制
+	// 所以这个布尔值，在服务器端将不会被设置
 	if (ShooterCharacter->HasWeaponFirstReplicated())
 	{
 		// Get Dynamic Material Instances from the Weapon.
@@ -32,6 +37,15 @@ void UShooterReticle::NativeOnInitialized()
 	else
 	{
 		ShooterCharacter->OnWeaponFirstReplicated.AddDynamic(this, &ThisClass::OnWeaponFirstReplicated);
+	}
+
+	// 服务器端，直接处理准星和弹药计数器材质
+	if (ShooterCharacter->HasAuthority())
+	{
+		AWeapon* Weapon = IPlayerInterface::Execute_GetCurrentWeapon(ShooterCharacter);
+		if (!IsValid(Weapon)) return;
+		OnReticleChanged(Weapon->GetReticleDynamicMaterialInstance());
+		OnAmmoCounterChanged(Weapon->GetAmmoCounterDynamicMaterialInstance(), Weapon->Ammo, Weapon->MagCapacity);
 	}
 }
 
@@ -69,9 +83,25 @@ void UShooterReticle::OnWeaponFirstReplicated(AWeapon* Weapon)
 void UShooterReticle::OnReticleChanged(UMaterialInstanceDynamic* ReticleDynMatInst)
 {
 	// Set the material on the actual reticle widget to the dyn mat inst
+	CurrentReticle_DynMatInst = ReticleDynMatInst;
+
+	FSlateBrush Brush;
+	Brush.SetResourceObject(ReticleDynMatInst);
+	if (IsValid(Image_Reticle))
+	{
+		Image_Reticle->SetBrush(Brush);
+	}
 }
 
 void UShooterReticle::OnAmmoCounterChanged(UMaterialInstanceDynamic* AmmoCounterDynMatInst, int32 RoundsCurrent, int32 RoundsMax)
 {
 	// Set the material on the actual ammo counter widget to the dyn mat inst
+	CurrentAmmoCounter_DynMatInst = AmmoCounterDynMatInst;
+
+	FSlateBrush Brush;
+	Brush.SetResourceObject(AmmoCounterDynMatInst);
+	if (IsValid(Image_AmmoCounter))
+	{
+		Image_AmmoCounter->SetBrush(Brush);
+	}
 }

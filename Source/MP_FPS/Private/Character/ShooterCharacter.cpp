@@ -272,6 +272,17 @@ void AShooterCharacter::PossessedBy(AController* NewController)
 	}
 }
 
+// 在玩家状态完成同步后，让射击角色触发准星与弹药计数器的状态变更广播
+void AShooterCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	if (IsValid(Combat))
+	{
+		Combat->InitializeWeaponWidgets();
+	}
+}
+
 FName AShooterCharacter::GetWeaponAttachPoint_Implementation(const FGameplayTag& WeaponType) const
 {
 	checkf(Combat->WeaponData, TEXT("No Weapon Data Asset - Please fill out BP_ShooterCharacter"));

@@ -34,6 +34,7 @@ public:
 	* 当某个 Controller 决定控制这个 Pawn 时，引擎在 AController::OnPossess 里主动调用它
 	*/
 	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 
 	/** PlayerInterface */
 	virtual FName GetWeaponAttachPoint_Implementation(const FGameplayTag& WeaponType) const override;

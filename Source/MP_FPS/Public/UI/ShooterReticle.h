@@ -44,6 +44,9 @@ private:
 	// 后续会随着新增因子逐步叠加
 	float _BaseCornerScaleFactor_RoundFired;
 	float _BaseShapeCutFactor_RoundFired;
+	float _BaseCornerScaleFactor_Aiming;
+	float _BaseShapeCutFactor_Aiming;
+	bool bAiming;
 
 	// 当Controller操控的Pawn变更时触发的委托
 	UFUNCTION()
@@ -61,4 +64,7 @@ private:
 
 	UFUNCTION()
 	void OnRoundFired(int32 RoundsCurrent, int32 RoundsMax);
+
+	UFUNCTION()
+	void OnAimingStatusChanged(bool bIsAiming);
 };

@@ -18,22 +18,39 @@ enum class ETurningInPlace : uint8
 /**
  * 通过动态材质实例参数，实时调整准星参数
  * 每个武器都有自己对应的动态材质实例，参数各不相同
+ * 仅在开火时变化，开火后立刻恢复
  */
 USTRUCT(BlueprintType)
 struct FReticleParams
 {
 	GENERATED_BODY()
 
-	// 仅在开火时变化，开火后立刻恢复
-	// 形状切割厚度，会改变准星的粗细
+	// 形状切割厚度因子，会改变准星的粗细
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float ShapeCutFactor_RoundFired = 0.f; // 形状切割厚度，会改变准星的粗细
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float ShapeCutFactor_Aiming = 0.f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float ShapeCutFactor_NotAiming = 0.f;
+
 
 	// 形状缩放系数，既圆角缩放
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float ScaleFactor_RoundFired = 0.f;
 
-	// 开火时的插值速度，通过设置插值速度来控制这个过程
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float ScaleFactor_Aiming = 0.f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float ScaleFactor_NotAiming = 0.f;
+
+
+	// 插值速度：开火时通过设置插值速度来控制这个过程
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float RoundFiredInterpSpeed = 20.f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float AimingInterpSpeed = 15.f;
 };

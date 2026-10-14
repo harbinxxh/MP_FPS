@@ -14,6 +14,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FReticleChanged, UMaterialInstanceD
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAmmoCounterChanged, UMaterialInstanceDynamic*, AmmoCounterDynMatInst, int32, RoundsCurrent, int32, RoundsMax);
 // 广播当前弹药数量和最大弹药数量
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoundFired, int32, RoundsCurrent, int32, RoundsMax);
+// 广播瞄准状态
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAimingStatusChanged, bool, IsAiming);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -50,6 +52,10 @@ public:
 	// 广播当前弹药数量和最大弹药数量
 	UPROPERTY(BlueprintAssignable)
 	FRoundFired OnRoundFired;
+
+	// 广播瞄准状态
+	UPROPERTY(BlueprintAssignable)
+	FAimingStatusChanged OnAimingStatusChanged;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponData;

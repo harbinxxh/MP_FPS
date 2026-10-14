@@ -12,6 +12,9 @@ class AWeapon;
 // 在第一次装备武器或切换武器时，广播材质
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FReticleChanged, UMaterialInstanceDynamic*, ReticleDynMatInst);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAmmoCounterChanged, UMaterialInstanceDynamic*, AmmoCounterDynMatInst, int32, RoundsCurrent, int32, RoundsMax);
+// 广播当前弹药数量和最大弹药数量
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoundFired, int32, RoundsCurrent, int32, RoundsMax);
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MP_FPS_API UCombatComponent : public UActorComponent
@@ -36,11 +39,17 @@ public:
 	void Initiate_Aim_Pressed();		// 瞄准按下
 	void Initiate_Aim_Released();		// 瞄准释放
 
+	// 广播准星材质
 	UPROPERTY(BlueprintAssignable)
 	FReticleChanged OnReticleChanged;
 
+	// 广播弹药数量材质
 	UPROPERTY(BlueprintAssignable)
 	FAmmoCounterChanged OnAmmoCounterChanged;
+
+	// 广播当前弹药数量和最大弹药数量
+	UPROPERTY(BlueprintAssignable)
+	FRoundFired OnRoundFired;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponData;

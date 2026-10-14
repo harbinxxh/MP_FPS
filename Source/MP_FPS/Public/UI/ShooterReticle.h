@@ -48,4 +48,7 @@ private:
 
 	UFUNCTION()
 	void OnAmmoCounterChanged(UMaterialInstanceDynamic* AmmoCounterDynMatInst, int32 RoundsCurrent, int32 RoundsMax);
+
+	UFUNCTION()
+	void OnRoundFired(int32 RoundsCurrent, int32 RoundsMax);
 };

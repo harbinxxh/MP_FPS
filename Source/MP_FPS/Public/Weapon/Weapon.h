@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GameplayTagContainer.h"
+#include "ShooterTypes/ShooterTypes.h"
 #include "Weapon.generated.h"
 
 
@@ -79,6 +80,10 @@ public:
 	// 武器发射间隔时长
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FPS|FirType")
 	float FireTime;
+
+	// 保存武器准星参数
+	UPROPERTY(EditDefaultsOnly, Category = "FPS|Reticle")
+	FReticleParams ReticleParams;
 
 	/**
 	 * ImpactPoint：击中点

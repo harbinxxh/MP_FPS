@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "ShooterTypes/ShooterTypes.h"
 #include "ShooterReticle.generated.h"
 
 class UImage;
@@ -34,6 +35,15 @@ private:
 	// TWeakObjectPtr 指针不需要 UPROPERTY 宏
 	TWeakObjectPtr<UMaterialInstanceDynamic> CurrentReticle_DynMatInst;
 	TWeakObjectPtr<UMaterialInstanceDynamic> CurrentAmmoCounter_DynMatInst;
+	
+	// 保存当前武器准星参数
+	FReticleParams CurrentReticleParams;
+	// 用来设置材质参数的具体数值
+	float BaseCornerScaleFactor;
+	float BaseShapeCutFactor;
+	// 后续会随着新增因子逐步叠加
+	float _BaseCornerScaleFactor_RoundFired;
+	float _BaseShapeCutFactor_RoundFired;
 
 	// 当Controller操控的Pawn变更时触发的委托
 	UFUNCTION()
@@ -44,7 +54,7 @@ private:
 
 	// 准星和弹药数量代理回调函数
 	UFUNCTION()
-	void OnReticleChanged(UMaterialInstanceDynamic* ReticleDynMatInst);
+	void OnReticleChanged(UMaterialInstanceDynamic* ReticleDynMatInst, const FReticleParams& ReticleParams);
 
 	UFUNCTION()
 	void OnAmmoCounterChanged(UMaterialInstanceDynamic* AmmoCounterDynMatInst, int32 RoundsCurrent, int32 RoundsMax);

@@ -14,6 +14,14 @@ namespace Ammo
 	const FName Rounds_Max = FName("Rounds_Max");
 }
 
+// 为准星需要调整的材质参数定义常量
+namespace Reticle
+{
+	const FName RoundedCornerScale = FName("RoundedCornerScale"); // 准星形状缩放系数
+	const FName ShapeCutThickness = FName("ShapeCutThickness"); // 准星形状切割厚度
+}
+
+
 void UShooterReticle::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
@@ -21,6 +29,8 @@ void UShooterReticle::NativeOnInitialized()
 	// 控件的渲染不透明度设为 0.0
 	Image_Reticle->SetRenderOpacity(0.f);
 	Image_AmmoCounter->SetRenderOpacity(0.f);
+	_BaseCornerScaleFactor_RoundFired = 0.f;
+	_BaseShapeCutFactor_RoundFired = 0.f;
 
 	// 当Controller控制的Pawn发生变更时，会调用该委托
 	GetOwningPlayer()->OnPossessedPawnChanged.AddDynamic(this, &ThisClass::OnPossessedPawnChanged);
@@ -40,7 +50,7 @@ void UShooterReticle::NativeOnInitialized()
 		AWeapon* Weapon = IPlayerInterface::Execute_GetCurrentWeapon(ShooterCharacter);
 		if (IsValid(Weapon))
 		{
-			OnReticleChanged(Weapon->GetReticleDynamicMaterialInstance());
+			OnReticleChanged(Weapon->GetReticleDynamicMaterialInstance(), Weapon->ReticleParams);
 			OnAmmoCounterChanged(Weapon->GetAmmoCounterDynamicMaterialInstance(), Weapon->Ammo, Weapon->MagCapacity);
 		}
 	}
@@ -54,13 +64,27 @@ void UShooterReticle::NativeOnInitialized()
 	{
 		AWeapon* Weapon = IPlayerInterface::Execute_GetCurrentWeapon(ShooterCharacter);
 		if (!IsValid(Weapon)) return;
-		OnReticleChanged(Weapon->GetReticleDynamicMaterialInstance());
+		OnReticleChanged(Weapon->GetReticleDynamicMaterialInstance(), Weapon->ReticleParams);
 		OnAmmoCounterChanged(Weapon->GetAmmoCounterDynamicMaterialInstance(), Weapon->Ammo, Weapon->MagCapacity);
 	}
 }
 
 void UShooterReticle::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	_BaseCornerScaleFactor_RoundFired = FMath::FInterpTo(_BaseCornerScaleFactor_RoundFired, 0.f, InDeltaTime, CurrentReticleParams.RoundFiredInterpSpeed);
+	_BaseShapeCutFactor_RoundFired = FMath::FInterpTo(_BaseShapeCutFactor_RoundFired, 0.f, InDeltaTime, CurrentReticleParams.RoundFiredInterpSpeed);
+
+	// 这两个因子合起来，就是基础缩放和基础形状切割的最终值
+	BaseCornerScaleFactor = _BaseCornerScaleFactor_RoundFired + 0.46;
+	BaseShapeCutFactor = _BaseShapeCutFactor_RoundFired - 0.7225;
+
+	if (CurrentReticle_DynMatInst.IsValid())
+	{
+		CurrentReticle_DynMatInst->SetScalarParameterValue(Reticle::RoundedCornerScale, BaseCornerScaleFactor);
+		CurrentReticle_DynMatInst->SetScalarParameterValue(Reticle::ShapeCutThickness, BaseShapeCutFactor);
+	}
 }
 
 void UShooterReticle::OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn)
@@ -91,13 +115,14 @@ void UShooterReticle::OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn)
 void UShooterReticle::OnWeaponFirstReplicated(AWeapon* Weapon)
 {
 	// Get Dynamic Material Instances from the Weapon.
-	OnReticleChanged(Weapon->GetReticleDynamicMaterialInstance());
+	OnReticleChanged(Weapon->GetReticleDynamicMaterialInstance(), Weapon->ReticleParams);
 	OnAmmoCounterChanged(Weapon->GetAmmoCounterDynamicMaterialInstance(), Weapon->Ammo, Weapon->MagCapacity);
 }
 
-void UShooterReticle::OnReticleChanged(UMaterialInstanceDynamic* ReticleDynMatInst)
+void UShooterReticle::OnReticleChanged(UMaterialInstanceDynamic* ReticleDynMatInst, const FReticleParams& ReticleParams)
 {
 	// Set the material on the actual reticle widget to the dyn mat inst
+	CurrentReticleParams = ReticleParams;
 	CurrentReticle_DynMatInst = ReticleDynMatInst;
 
 	FSlateBrush Brush;
@@ -125,6 +150,10 @@ void UShooterReticle::OnAmmoCounterChanged(UMaterialInstanceDynamic* AmmoCounter
 
 void UShooterReticle::OnRoundFired(int32 RoundsCurrent, int32 RoundsMax)
 {
+	// 开火时，这个值就会从0变为缩放因子的值
+	_BaseCornerScaleFactor_RoundFired += CurrentReticleParams.ScaleFactor_RoundFired;
+	_BaseShapeCutFactor_RoundFired += CurrentReticleParams.ShapeCutFactor_RoundFired;
+
 	if (CurrentAmmoCounter_DynMatInst.IsValid())
 	{
 		CurrentAmmoCounter_DynMatInst->SetScalarParameterValue(Ammo::Rounds_Current, RoundsCurrent);

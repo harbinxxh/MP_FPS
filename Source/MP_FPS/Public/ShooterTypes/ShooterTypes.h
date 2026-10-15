@@ -46,6 +46,12 @@ struct FReticleParams
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float ScaleFactor_NotAiming = 0.f;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere) // 瞄准时玩家缩放系数
+	float ScaleFactor_Targeting = 0.f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere) // 未瞄准时玩家缩放系数
+	float ScaleFactor_NotTargeting = 0.f;
+
 
 	// 插值速度：开火时通过设置插值速度来控制这个过程
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -53,4 +59,7 @@ struct FReticleParams
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float AimingInterpSpeed = 15.f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float TargetingPlayerInterpSpeed = 10.f; // 瞄准玩家时的插值速度
 };

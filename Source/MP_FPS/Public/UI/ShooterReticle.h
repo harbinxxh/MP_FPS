@@ -46,6 +46,7 @@ private:
 	float _BaseShapeCutFactor_RoundFired;
 	float _BaseCornerScaleFactor_Aiming;
 	float _BaseShapeCutFactor_Aiming;
+	float _BaseCornerScaleFactor_TargetingPlayer; // 准星玩家缩放系数
 	bool bAiming;
 	bool bTargetingPlayer; // 用来判断是否瞄准了玩家
 
@@ -58,7 +59,7 @@ private:
 
 	// 准星和弹药数量代理回调函数
 	UFUNCTION()
-	void OnReticleChanged(UMaterialInstanceDynamic* ReticleDynMatInst, const FReticleParams& ReticleParams);
+	void OnReticleChanged(UMaterialInstanceDynamic* ReticleDynMatInst, const FReticleParams& ReticleParams, bool bCurrentlyTargetingPlayer);
 
 	UFUNCTION()
 	void OnAmmoCounterChanged(UMaterialInstanceDynamic* AmmoCounterDynMatInst, int32 RoundsCurrent, int32 RoundsMax);

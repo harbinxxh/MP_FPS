@@ -9,8 +9,8 @@
 class UWeaponData;
 class AWeapon;
 
-// 在第一次装备武器或切换武器时，广播材质和准星参数
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FReticleChanged, UMaterialInstanceDynamic*, ReticleDynMatInst, const FReticleParams&, ReticleParams);
+// 在第一次装备武器或切换武器时，广播材质和准星参数，瞄准玩家状态（瞄准玩家时的状态、未瞄准玩家时的状态）
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FReticleChanged, UMaterialInstanceDynamic*, ReticleDynMatInst, const FReticleParams&, ReticleParams, bool, bCurrentlyTargetingPlayer);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAmmoCounterChanged, UMaterialInstanceDynamic*, AmmoCounterDynMatInst, int32, RoundsCurrent, int32, RoundsMax);
 // 广播当前弹药数量和最大弹药数量
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoundFired, int32, RoundsCurrent, int32, RoundsMax);
@@ -101,8 +101,9 @@ protected:
 	float TraceLength;
 
 private:
-
-	// 判断上一帧是否击中了玩家
+	// 判断当前帧是否瞄准了玩家
+	bool bHitPlayer;
+	// 判断上一帧是否瞄准了玩家
 	bool bHitPlayerLastFrame;
 
 	// 是否一直在触发枪的扳机

@@ -91,7 +91,7 @@ void AWeapon::WeaponTrace(FHitResult& OutHit, float TraceLength)
 {
 	FCollisionQueryParams QueryParams;
 	QueryParams.bReturnPhysicalMaterial = true;
-	QueryParams.AddIgnoredActor(GetOwner());
+	QueryParams.AddIgnoredActor(GetOwner()); // 不想命中拥有者
 
 	// 设置碰撞的具体行为
 	FCollisionResponseParams ResponseParams;

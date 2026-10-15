@@ -8,6 +8,9 @@
 #include "Animation/AnimMontage.h"
 #include "Data/WeaponData.h"
 #include "Interfaces/PlayerInterface.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "MP_FPS/MP_FPS.h"
+//#include "KismetTraceUtils.h"
 
 
 // Sets default values for this component's properties
@@ -23,7 +26,48 @@ UCombatComponent::UCombatComponent()
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	
+	APawn* OwningPawn = Cast<APawn>(GetOwner());
+	if (!IsValid(OwningPawn) || !OwningPawn->IsLocallyControlled()) return;
 
+	APlayerController* PC = Cast<APlayerController>(OwningPawn->GetController());
+	if (!IsValid(PC)) return;
+
+	// 1、获取角色视角位置
+	FVector EyesWorldLocation;
+	FRotator EyesWorldRotation;
+	PC->GetActorEyesViewPoint(EyesWorldLocation, EyesWorldRotation);
+	const FVector EyesWorldDirection = UKismetMathLibrary::GetForwardVector(EyesWorldRotation);
+
+	// 用角色眼睛的位置，作为射线检测的起点
+	const FVector Start = EyesWorldLocation;
+	const FVector End = Start + EyesWorldDirection * TraceLength;
+	
+	FHitResult Hit;
+	FCollisionQueryParams QueryParams;
+	QueryParams.bReturnPhysicalMaterial = true;
+	QueryParams.AddIgnoredActor(GetOwner()); // 不想命中拥有者
+
+	// 设置碰撞的具体行为
+	FCollisionResponseParams ResponseParams;
+	ResponseParams.CollisionResponse.SetAllChannels(ECR_Ignore);
+	ResponseParams.CollisionResponse.SetResponse(ECC_Pawn, ECR_Block);
+	ResponseParams.CollisionResponse.SetResponse(ECC_PhysicsBody, ECR_Block);
+
+	// 射线追踪
+	const bool bHit = GetWorld()->LineTraceSingleByChannel( Hit, Start, End, FPSTraceChannels::ECC_Weapon,
+					QueryParams, ResponseParams);
+
+	// 判断击中的角色，是否实现了玩家接口
+	const bool bHitPlayer = IsValid(Hit.GetActor()) && Hit.GetActor()->Implements<UPlayerInterface>();
+
+	if (bHitPlayer != bHitPlayerLastFrame)
+	{
+		// 广播是否瞄准玩家的状态
+		OnTargetingPlayerStatusChanged.Broadcast(bHitPlayer);
+	}
+
+	bHitPlayerLastFrame = bHitPlayer;
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

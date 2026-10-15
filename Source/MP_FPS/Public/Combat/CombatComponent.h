@@ -16,7 +16,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAmmoCounterChanged, UMaterialIns
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoundFired, int32, RoundsCurrent, int32, RoundsMax);
 // 广播瞄准状态
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAimingStatusChanged, bool, IsAiming);
-
+// 广播是否瞄准玩家的状态
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetingPlayerStatusChanged, bool, IsAiming);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MP_FPS_API UCombatComponent : public UActorComponent
@@ -57,6 +58,10 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FAimingStatusChanged OnAimingStatusChanged;
 
+	// 广播是否瞄准玩家的状态
+	UPROPERTY(BlueprintAssignable)
+	FTargetingPlayerStatusChanged OnTargetingPlayerStatusChanged;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponData;
 
@@ -96,6 +101,9 @@ protected:
 	float TraceLength;
 
 private:
+
+	// 判断上一帧是否击中了玩家
+	bool bHitPlayerLastFrame;
 
 	// 是否一直在触发枪的扳机
 	bool bTriggerPressed;

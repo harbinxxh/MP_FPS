@@ -47,6 +47,7 @@ private:
 	float _BaseCornerScaleFactor_Aiming;
 	float _BaseShapeCutFactor_Aiming;
 	bool bAiming;
+	bool bTargetingPlayer; // 用来判断是否瞄准了玩家
 
 	// 当Controller操控的Pawn变更时触发的委托
 	UFUNCTION()
@@ -67,4 +68,7 @@ private:
 
 	UFUNCTION()
 	void OnAimingStatusChanged(bool bIsAiming);
+
+	UFUNCTION()
+	void OnTargetingPlayerStatusChanged(bool bTargeting);
 };

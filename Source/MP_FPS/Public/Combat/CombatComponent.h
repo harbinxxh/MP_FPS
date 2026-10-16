@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameplayTagContainer.h"
 #include "CombatComponent.generated.h"
 
 class UWeaponData;
@@ -18,6 +19,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoundFired, int32, RoundsCurrent, 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAimingStatusChanged, bool, IsAiming);
 // 广播是否瞄准玩家的状态
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetingPlayerStatusChanged, bool, IsAiming);
+// 广播当前备用弹药量和武器里的弹药量
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCurrentReserveAmmoChanged, int32, RoundsInWeapon, int32, RoundsInReserve);
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MP_FPS_API UCombatComponent : public UActorComponent
@@ -62,6 +66,10 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FTargetingPlayerStatusChanged OnTargetingPlayerStatusChanged;
 
+	// 广播当前备用弹药量和武器里的弹药量
+	UPROPERTY(BlueprintAssignable)
+	FCurrentReserveAmmoChanged OnCurrentReserveAmmoChanged;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponData;
 
@@ -95,21 +103,34 @@ public:
 	// 初始化武器控件
 	void InitializeWeaponWidgets() const;
 
+	// 当前备用弹药量
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentReserveAmmo)
+	int32 CurrentReserveAmmo;
+
+	// 判断当前帧是否瞄准了玩家
+	bool bHitPlayer;
+
 protected:
 	// 射线长度
 	UPROPERTY(EditDefaultsOnly, Category = "FPS|Weapon")
 	float TraceLength;
 
 private:
-	// 判断当前帧是否瞄准了玩家
-	bool bHitPlayer;
+	/**
+	 * 所有武器被备用弹药量： 
+	 * 必须为所有武器类型维护备用弹药，只在服务器上更新它，这是由服务器掌控的权威数据
+	 * 一旦它发生变化，根据当前装备的武器类型，更新当前备用弹药数量
+	 * 不需要同步数据，只是把这部分数据保留在服务器上
+	 */
+	TMap<FGameplayTag, int32> ReserveAmmo;
+	
 	// 判断上一帧是否瞄准了玩家
 	bool bHitPlayerLastFrame;
-
 	// 是否一直在触发枪的扳机
 	bool bTriggerPressed;
 	// 设置多长的持续时间，就是全自动射击时武器的发射间隔是多长
 	FTimerHandle FireTimer;
+
 	void FireTimerFinished();
 
 	/**
@@ -149,6 +170,10 @@ private:
 	// 服务器调用多播代理时，客户端每台机器都会执行多播 RPC
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_FileWeapon(const FHitResult& Hit, int32 AuthAmmo);
+
+	// 当前备用弹药量回调函数
+	UFUNCTION()
+	void OnRep_CurrentReserveAmmo();
 
 	// 用来处理瞄准 bAiming 变量
 	void Local_Aim(bool bPressed);

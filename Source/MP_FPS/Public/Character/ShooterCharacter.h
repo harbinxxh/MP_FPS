@@ -16,7 +16,7 @@ class AWeapon;
 
 // 定义一个委托，用来在武器首次复制时触发广播
 // 声明一个动态多播委托，带一个参数（这个参数就是刚复制完成的武器）
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponFirstReplicated, AWeapon*, Weapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWeaponFirstReplicated, AWeapon*, Weapon, bool, bTargetingPlayer);
 
 
 UCLASS()

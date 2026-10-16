@@ -76,12 +76,16 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 
 	DOREPLIFETIME(UCombatComponent, Inventory);
 	DOREPLIFETIME(UCombatComponent, CurrentWeapon);
+
 	/**
 	 * COND_SkipOwner:此属性会发送给除拥有者之外的所有连接
 	 * 跳过拥有者，因为在本地通过右键鼠标或手柄左扳机来设置瞄准，所以不需要把更新发回自己
 	 * 所以本地设置瞄准，就不用让服务器再把数据推回来，它是复制变量，让其他玩家都能看见我们瞄准，但不需要同步回我们自己
 	 */
 	DOREPLIFETIME_CONDITION(UCombatComponent, bAiming, COND_SkipOwner);
+
+	// 这项数据不需要广播给所有客户端, 只需同步给拥有者客户端
+	DOREPLIFETIME_CONDITION(UCombatComponent, CurrentReserveAmmo, COND_OwnerOnly);
 }
 
 void UCombatComponent::Initiate_CycleWeapon()
@@ -229,6 +233,14 @@ void UCombatComponent::Server_Aim_Implementation(bool bPressed)
 	Local_Aim(bPressed);
 }
 
+void UCombatComponent::OnRep_CurrentReserveAmmo()
+{
+	if (IsValid(CurrentWeapon))
+	{
+		OnCurrentReserveAmmoChanged.Broadcast(CurrentReserveAmmo, CurrentWeapon->Ammo);
+	}
+}
+
 void UCombatComponent::Local_Aim(bool bPressed)
 {
 	bAiming = bPressed;
@@ -242,6 +254,10 @@ void UCombatComponent::Equip(AWeapon* Weapon)
 	CurrentWeapon = Weapon;
 	// 挂载武器
 	CurrentWeapon->AttachToOwningPawn();
+	// 初始化当前备用弹药量
+	CurrentReserveAmmo = ReserveAmmo.FindChecked(CurrentWeapon->WeaponType);
+	// 广播当前备用弹药量和武器里的弹药量
+	OnCurrentReserveAmmoChanged.Broadcast(CurrentReserveAmmo, Weapon->Ammo);
 }
 
 // SpawnInventory() 函数只会在服务器上实例化武器
@@ -254,6 +270,7 @@ void UCombatComponent::SpawnInventory()
 	{
 		AWeapon* Weapon = SpawnSeapon(WeaponClass);
 		Inventory.AddUnique(Weapon);
+		ReserveAmmo.Add(Weapon->WeaponType, Weapon->StartingCarriedAmmo);
 	}
 
 	// 现在把武器附加上去，算是临时装备了，之后会做更多事，比如设置当前武器变量。

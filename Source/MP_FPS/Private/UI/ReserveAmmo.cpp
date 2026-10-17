@@ -42,6 +42,14 @@ void UReserveAmmo::NativeOnInitialized()
 	{
 		ShooterCharacter->OnWeaponFirstReplicated.AddDynamic(this, &ThisClass::OnWeaponFirstReplicated);
 	}
+
+	// 服务器端
+	if (ShooterCharacter->HasAuthority())
+	{
+		AWeapon* Weapon = IPlayerInterface::Execute_GetCurrentWeapon(ShooterCharacter);
+		if (!IsValid(Weapon)) return;
+		OnCurrentReserveAmmoChanged(IPlayerInterface::Execute_GetReserveAmmo(ShooterCharacter), Weapon->Ammo);
+	}
 }
 
 void UReserveAmmo::OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn)
@@ -70,8 +78,7 @@ void UReserveAmmo::OnCurrentReserveAmmoChanged(int32 RoundsInReserve, int32 Roun
 {
 	// TODO: Changed Weapon Icon
 
-	// 角色身上有36发备用弹药，枪里6发
-	// RoundsInWeapon / RoundsInReserve 就显示 6 / 36
+	// 如果，角色身上有36发备用弹药，枪里6发【RoundsInWeapon / RoundsInReserve - 显示 6 / 36】
 	if (IsValid(Text_Ammo))
 	{
 		// 宏 NSLOCTEXT() 能让文本实现本地化，这样字符串就会经过本地化系统，自动完成翻译

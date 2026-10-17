@@ -66,7 +66,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FTargetingPlayerStatusChanged OnTargetingPlayerStatusChanged;
 
-	// 广播当前备用弹药量和武器里的弹药量
+	// (武器备用弹药量变更时) 广播当前备用弹药量和武器里的弹药量
 	UPROPERTY(BlueprintAssignable)
 	FCurrentReserveAmmoChanged OnCurrentReserveAmmoChanged;
 

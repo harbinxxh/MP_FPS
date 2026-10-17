@@ -36,11 +36,11 @@ private:
 	UFUNCTION()
 	void OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn);
 
-	// 当前备用弹药量和武器里的弹药量
+	// (武器备用弹药量变更时) 当前备用弹药量和武器里的弹药量
 	UFUNCTION()
 	void OnCurrentReserveAmmoChanged(int32 RoundsInReserve, int32 RoundsInWeapon);
 
-	// (武器开火时)当前弹药数量和最大弹药数量、武器备用弹药量
+	// (武器开火时) 当前弹药数量和最大弹药数量、武器备用弹药量
 	UFUNCTION()
 	void OnRoundFired(int32 RoundsCurrent, int32 RoundsMax, int32 RoundsInReserve);
 

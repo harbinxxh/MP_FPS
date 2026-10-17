@@ -170,7 +170,7 @@ void UShooterReticle::OnAmmoCounterChanged(UMaterialInstanceDynamic* AmmoCounter
 	}
 }
 
-void UShooterReticle::OnRoundFired(int32 RoundsCurrent, int32 RoundsMax)
+void UShooterReticle::OnRoundFired(int32 RoundsCurrent, int32 RoundsMax, int32 RoundsInReserve)
 {
 	// 开火时，这个值就会从0变为缩放因子的值
 	_BaseCornerScaleFactor_RoundFired += CurrentReticleParams.ScaleFactor_RoundFired;

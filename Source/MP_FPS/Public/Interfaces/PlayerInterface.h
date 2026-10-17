@@ -43,4 +43,8 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	AWeapon* GetCurrentWeapon();
+
+	// 获取当前武器的备用弹药量
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	int32 GetReserveAmmo() const;
 };

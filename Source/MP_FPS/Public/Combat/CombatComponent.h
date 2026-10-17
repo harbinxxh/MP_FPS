@@ -13,14 +13,14 @@ class AWeapon;
 // 在第一次装备武器或切换武器时，广播材质和准星参数，瞄准玩家状态（瞄准玩家时的状态、未瞄准玩家时的状态）
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FReticleChanged, UMaterialInstanceDynamic*, ReticleDynMatInst, const FReticleParams&, ReticleParams, bool, bCurrentlyTargetingPlayer);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAmmoCounterChanged, UMaterialInstanceDynamic*, AmmoCounterDynMatInst, int32, RoundsCurrent, int32, RoundsMax);
-// 广播当前弹药数量和最大弹药数量
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoundFired, int32, RoundsCurrent, int32, RoundsMax);
-// 广播瞄准状态
+// (武器开火时) 广播当前弹药量和最大弹药量、武器备用弹药量
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FRoundFired, int32, RoundsCurrent, int32, RoundsMax, int32, RoundsInReserve);
+// (武器瞄准时) 广播瞄准状态
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAimingStatusChanged, bool, IsAiming);
-// 广播是否瞄准玩家的状态
+// (武器瞄准时) 广播是否瞄准玩家的状态
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetingPlayerStatusChanged, bool, IsAiming);
-// 广播当前备用弹药量和武器里的弹药量
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCurrentReserveAmmoChanged, int32, RoundsInWeapon, int32, RoundsInReserve);
+// (武器备用弹药量变更时) 广播当前备用弹药量和武器里的弹药量
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCurrentReserveAmmoChanged, int32, RoundsInReserve, int32, RoundsInWeapon);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -54,7 +54,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FAmmoCounterChanged OnAmmoCounterChanged;
 
-	// 广播当前弹药数量和最大弹药数量
+	// (武器开火时)广播当前弹药数量和最大弹药数量、武器备用弹药量
 	UPROPERTY(BlueprintAssignable)
 	FRoundFired OnRoundFired;
 

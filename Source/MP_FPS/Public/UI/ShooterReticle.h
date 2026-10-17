@@ -64,8 +64,9 @@ private:
 	UFUNCTION()
 	void OnAmmoCounterChanged(UMaterialInstanceDynamic* AmmoCounterDynMatInst, int32 RoundsCurrent, int32 RoundsMax);
 
+	// (武器开火时)当前弹药数量和最大弹药数量、武器备用弹药量
 	UFUNCTION()
-	void OnRoundFired(int32 RoundsCurrent, int32 RoundsMax);
+	void OnRoundFired(int32 RoundsCurrent, int32 RoundsMax, int32 RoundsInReserve);
 
 	UFUNCTION()
 	void OnAimingStatusChanged(bool bIsAiming);

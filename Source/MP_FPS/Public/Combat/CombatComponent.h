@@ -180,4 +180,9 @@ private:
 
 	// 处理本地武器射击效果
 	void Local_FireWeapon();
+
+	// 递增武器索引并返回新值
+	int32 AdvanceWeaponIndex();
+	// 武器数组中的索引值,每次切换武器时，都会更新这个索引
+	int32 Local_WeaponIndex;
 };

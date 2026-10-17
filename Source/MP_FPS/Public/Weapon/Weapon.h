@@ -17,6 +17,16 @@ enum class EFireType : uint8
 	SemiAuto UMETA(DisplayName = "SemiAutomatic")
 };
 
+// 武器切换状态
+UENUM(BlueprintType)
+enum class EWeaponStatus : uint8
+{
+	Idle,		// Weapon doing nothing, can fire/reload/cycle
+	Firing,		// Currently firing, can't reload/cycle
+	Reloading,	// Currently reloading, can't fire/cycle
+	Cycling,	// Currently cycling to the next weapon, can't fire/reload/cycle
+	Unequipped	// On our person, but can't do anything
+};
 
 UCLASS()
 class MP_FPS_API AWeapon : public AActor
@@ -123,6 +133,8 @@ public:
 	int32 StartingCarriedAmmo;
 	//-----------------------------------------------------
 
+	// 武器状态值
+	EWeaponStatus WeaponStatus;
 protected:
 	virtual void BeginPlay() override;
 

@@ -21,6 +21,7 @@ UCombatComponent::UCombatComponent()
 	TraceLength = 20000;
 	bAiming = false;
 	bTriggerPressed = false;
+	Local_WeaponIndex = 0;
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -90,8 +91,28 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 
 void UCombatComponent::Initiate_CycleWeapon()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, TEXT("Initiate_CycleWeapon"), false);
+	if (!IsValid(CurrentWeapon)) return;
+	if (CurrentWeapon->WeaponStatus == EWeaponStatus::Cycling) return;
+
+	AdvanceWeaponIndex();
+	// Local_CycleWeapon(WeaponIndex)
+	// Server_Cycleweapon(WeaponIndex)
 }
+
+// Local_CycleWeapon
+	// Play the equip montage of the weapon at WeaponIndex
+		// if locally-controlled, play the 1P, otherwise play the 3P
+	// if locally controlled Server_cycleweapon()
+	// Set the WeaponStatus on CurrentWeapon to Cycling
+
+// Server_Cycleweapon
+	// Set the local weapon index
+	// Multicast_cycleWeapon(weaponIndex)
+
+// Multicast_Cycleweapon
+	// Set local weapon index
+	// Local_Cycleweapon(WeaponIndex)
+
 
 void UCombatComponent::Initiate_FireWeapon_Pressed()
 {
@@ -139,6 +160,16 @@ void UCombatComponent::Local_FireWeapon()
 
 	// 通知服务器，已执行开枪操作
 	 Server_FireWeapon(Hit);
+}
+
+int32 UCombatComponent::AdvanceWeaponIndex()
+{
+	if (Inventory.Num() >= 2)
+	{
+		// 取模运算，循环武器数组索引
+		Local_WeaponIndex = (Local_WeaponIndex + 1) % Inventory.Num();
+	}
+	return Local_WeaponIndex;
 }
 
 void UCombatComponent::InitializeWeaponWidgets() const

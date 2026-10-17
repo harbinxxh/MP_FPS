@@ -34,8 +34,8 @@ void UReserveAmmo::NativeOnInitialized()
 		if (IsValid(Weapon))
 		{
 			// Reserve Ammo amount for the current weapon, CurrentWeapon->Ammo.
-			// param:当前武器的备用弹药量, 当前武器的弹药量
-			OnCurrentReserveAmmoChanged(IPlayerInterface::Execute_GetReserveAmmo(ShooterCharacter), Weapon->Ammo);
+			// param:当前武器备用弹药量, 当前武器弹药量、武器图标材质
+			OnCurrentReserveAmmoChanged(IPlayerInterface::Execute_GetReserveAmmo(ShooterCharacter), Weapon->Ammo, Weapon->WeaponIcon);
 		}
 	}
 	else
@@ -48,7 +48,7 @@ void UReserveAmmo::NativeOnInitialized()
 	{
 		AWeapon* Weapon = IPlayerInterface::Execute_GetCurrentWeapon(ShooterCharacter);
 		if (!IsValid(Weapon)) return;
-		OnCurrentReserveAmmoChanged(IPlayerInterface::Execute_GetReserveAmmo(ShooterCharacter), Weapon->Ammo);
+		OnCurrentReserveAmmoChanged(IPlayerInterface::Execute_GetReserveAmmo(ShooterCharacter), Weapon->Ammo, Weapon->WeaponIcon);
 	}
 }
 
@@ -74,9 +74,18 @@ void UReserveAmmo::OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn)
 	}
 }
 
-void UReserveAmmo::OnCurrentReserveAmmoChanged(int32 RoundsInReserve, int32 RoundsInWeapon)
+void UReserveAmmo::OnCurrentReserveAmmoChanged(int32 RoundsInReserve, int32 RoundsInWeapon, UMaterialInterface* WeaponIconMaterial)
 {
-	// TODO: Changed Weapon Icon
+	// Changed Weapon Icon
+	if (IsValid(WeaponIconMaterial))
+	{
+		FSlateBrush Brush;
+		Brush.SetResourceObject(WeaponIconMaterial);
+		if (IsValid(Image_WeaponIcon))
+		{
+			Image_WeaponIcon->SetBrush(Brush);
+		}
+	}
 
 	// 如果，角色身上有36发备用弹药，枪里6发【RoundsInWeapon / RoundsInReserve - 显示 6 / 36】
 	if (IsValid(Text_Ammo))
@@ -101,6 +110,6 @@ void UReserveAmmo::OnWeaponFirstReplicated(AWeapon* Weapon, bool bIsTargetingPla
 	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(GetOwningPlayer()->GetPawn());
 	if (!IsValid(ShooterCharacter)) return;
 
-	// param:当前武器的备用弹药量和当前武器的弹药量
-	OnCurrentReserveAmmoChanged(IPlayerInterface::Execute_GetReserveAmmo(ShooterCharacter), Weapon->Ammo);
+	// param:当前武器备用弹药量和当前武器的弹药量、武器图标材质
+	OnCurrentReserveAmmoChanged(IPlayerInterface::Execute_GetReserveAmmo(ShooterCharacter), Weapon->Ammo, Weapon->WeaponIcon);
 }

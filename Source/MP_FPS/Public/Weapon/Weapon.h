@@ -85,6 +85,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "FPS|Reticle")
 	FReticleParams ReticleParams;
 
+	// 武器图标材质
+	UPROPERTY(EditDefaultsOnly, Category = "FPS|Icon")
+	TObjectPtr<UMaterialInterface> WeaponIcon;
+
 	/**
 	 * ImpactPoint：击中点
 	 * ImpactNormal：击中法线

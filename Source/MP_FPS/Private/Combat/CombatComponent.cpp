@@ -237,7 +237,7 @@ void UCombatComponent::OnRep_CurrentReserveAmmo()
 {
 	if (IsValid(CurrentWeapon))
 	{
-		OnCurrentReserveAmmoChanged.Broadcast(CurrentReserveAmmo, CurrentWeapon->Ammo);
+		OnCurrentReserveAmmoChanged.Broadcast(CurrentReserveAmmo, CurrentWeapon->Ammo, CurrentWeapon->WeaponIcon);
 	}
 }
 
@@ -256,8 +256,8 @@ void UCombatComponent::Equip(AWeapon* Weapon)
 	CurrentWeapon->AttachToOwningPawn();
 	// 初始化当前备用弹药量
 	CurrentReserveAmmo = ReserveAmmo.FindChecked(CurrentWeapon->WeaponType);
-	// 广播当前备用弹药量和武器里的弹药量
-	OnCurrentReserveAmmoChanged.Broadcast(CurrentReserveAmmo, Weapon->Ammo);
+	// 广播当前武器备用弹药量和武器的弹药量、武器图标材质
+	OnCurrentReserveAmmoChanged.Broadcast(CurrentReserveAmmo, Weapon->Ammo, CurrentWeapon->WeaponIcon);
 }
 
 // SpawnInventory() 函数只会在服务器上实例化武器

@@ -95,8 +95,53 @@ void UCombatComponent::Initiate_CycleWeapon()
 	if (CurrentWeapon->WeaponStatus == EWeaponStatus::Cycling) return;
 
 	AdvanceWeaponIndex();
-	// Local_CycleWeapon(WeaponIndex)
-	// Server_Cycleweapon(WeaponIndex)
+	Local_CycleWeapon(Local_WeaponIndex);
+	// Server_Cycleweapon(WeaponIndex);
+}
+
+void UCombatComponent::Local_CycleWeapon(int32 WeaponIndex)
+{
+	// 通过武器索引获取武器
+	AWeapon* NextWeapon = Inventory[WeaponIndex];
+	if (!IsValid(NextWeapon) || !IsValid(WeaponData)) return;
+
+	CurrentWeapon->WeaponStatus = EWeaponStatus::Cycling;
+	NextWeapon->WeaponStatus = EWeaponStatus::Cycling;
+
+	APawn* OwningPawn = Cast<APawn>(GetOwner());
+	const bool bIsLocal = IsValid(OwningPawn) && OwningPawn->IsLocallyControlled();
+
+	// 获取剪辑动画的数据结构
+	const FMontageData& MontageData = bIsLocal ? WeaponData->FirstPersonMontages.FindChecked(NextWeapon->WeaponType) : WeaponData->ThirdPersonMontages.FindChecked(NextWeapon->WeaponType);
+	USkeletalMeshComponent* Mesh = bIsLocal ? IPlayerInterface::Execute_GetMesh1P(GetOwner()) : IPlayerInterface::Execute_GetMesh3P(GetOwner());
+	if (IsValid(Mesh) && IsValid(MontageData.EquipMontage))
+	{
+		// 播放一个蒙太奇片段，返回蒙太奇时长（秒）。如果无法播放返回 0.
+		Mesh->GetAnimInstance()->Montage_Play(MontageData.EquipMontage);
+	}
+	
+	if (bIsLocal)
+	{
+		Server_CycleWeapon(WeaponIndex); // 调用服务器的RPC
+	}
+}
+
+void UCombatComponent::Server_CycleWeapon_Implementation(int32 WeaponIndex)
+{
+	Local_WeaponIndex = WeaponIndex;
+	Multicast_CycleWeapon(WeaponIndex);
+}
+
+void UCombatComponent::Multicast_CycleWeapon_Implementation(int32 WeaponIndex)
+{
+	APawn* OwningPawn = Cast<APawn>(GetOwner());
+	if (!IsValid(OwningPawn)) return;
+
+	if (!OwningPawn->IsLocallyControlled())
+	{
+		Local_WeaponIndex = WeaponIndex;
+		Local_CycleWeapon(WeaponIndex);
+	}
 }
 
 // Local_CycleWeapon
@@ -284,7 +329,7 @@ void UCombatComponent::Equip(AWeapon* Weapon)
 	// 这会改变CurrentWeapon复制变量，让它同步复制，并让它的onRep函数在客户端自动触发
 	CurrentWeapon = Weapon;
 	// 挂载武器
-	CurrentWeapon->AttachToOwningPawn();
+	CurrentWeapon->AttachToOwningPawn(Cast<APawn>(GetOwner()));
 	// 初始化当前备用弹药量
 	CurrentReserveAmmo = ReserveAmmo.FindChecked(CurrentWeapon->WeaponType);
 	// 广播当前武器备用弹药量和武器的弹药量、武器图标材质
@@ -346,11 +391,15 @@ void UCombatComponent::DestroyInventory()
 void UCombatComponent::OnRep_CurrentWeapon(AWeapon* LastWeapon)
 {
 	if (!IsValid(CurrentWeapon)) return;
-	CurrentWeapon->AttachToOwningPawn();
+	CurrentWeapon->AttachToOwningPawn(Cast<APawn>(GetOwner()));
 	IPlayerInterface::Execute_WeaponReplicated(GetOwner());
 	InitializeWeaponWidgets();
 
 	/**
+	* AWeapon 中的 AWeapon::OnRep_Instigator() 函数，
+	* 已经注释掉了，没有删除，是因为便于理解，为啥不使用AWeapon 中的 OnRep_Instigator() 函数
+	* 因为会出现，战斗组件中的当前武器，在 Instigator 复制完成前就已复制的问题
+	* 
 	* 还需要在Weapon类中的OnRep_Instigator()函数里完成这个操作
 	* 因为，当我们生成武器并设定当前武器时,有时候多个对象的复制顺序是不可预测的
 	* 所以，我们得确保在有有效实例者时执行这个操作

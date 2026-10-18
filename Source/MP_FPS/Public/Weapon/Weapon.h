@@ -57,7 +57,8 @@ public:
 	* 当Instigator被复制时，会调用客户端事件通知函数
 	* 在 OnRep_Instigator() 函数里，调用 AttachToOwningPawn() 函数，为玩家角色绑定武器
 	*/
-	virtual void OnRep_Instigator() override;
+	// 注释掉 OnRep_Instigator 函数，因为会出现，战斗组件中的当前武器，在 Instigator 复制完成前就已复制的问题
+	//virtual void OnRep_Instigator() override;
 
 
 	USkeletalMeshComponent* GetMesh1P() const;
@@ -69,7 +70,7 @@ public:
 	void WeaponTrace(FHitResult& OutHit, float TraceLength);
 
 	// 把武器绑定到拥有者，也就是控制的Pawn上
-	void AttachToOwningPawn() const;
+	void AttachToOwningPawn(APawn* Pawn) const;
 
 	// 武器类型：根据武器类型决定该播放哪些姿势或蒙太奇
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FPS|WeaponType")

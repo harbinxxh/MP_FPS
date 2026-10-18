@@ -49,14 +49,14 @@ AWeapon::AWeapon()
 }
 
 // 在 OnRep_Instigator() 函数里，调用 AttachToOwningPawn() 函数，为玩家角色绑定武器
-void AWeapon::OnRep_Instigator()
-{
-	// 不需要 Super:: 调用，父类是空实现
-	//Super::OnRep_Instigator();
-
-	// 武器绑定到客户端玩家角色上
-	AttachToOwningPawn();
-}
+//void AWeapon::OnRep_Instigator()
+//{
+//	// 不需要 Super:: 调用，父类是空实现
+//	//Super::OnRep_Instigator();
+//
+//	// 武器绑定到客户端玩家角色上
+//	AttachToOwningPawn();
+//}
 
 USkeletalMeshComponent* AWeapon::GetMesh1P() const
 {
@@ -153,19 +153,18 @@ void AWeapon::WeaponTrace(FHitResult& OutHit, float TraceLength)
 * 另外一种是使用接口，接口更方面
 * 使用接口
 */
-void AWeapon::AttachToOwningPawn() const
+void AWeapon::AttachToOwningPawn(APawn* Pawn) const
 {
-	APawn* OwningPawn = GetInstigator();
-	if (!IsValid(OwningPawn) || !OwningPawn->Implements<UPlayerInterface>()) return;
+	if (!IsValid(Pawn) || !Pawn->Implements<UPlayerInterface>()) return;
 
 	// 先设好可见性，再开始绑定，要是某个网格不可见，绑定就会失败
-	SetMeshVisibilities(OwningPawn);
+	SetMeshVisibilities(Pawn);
 
 	// 武器绑定到角色上
 	// 1.首先，要获取武器绑定点
-	const FName AttachPoint = IPlayerInterface::Execute_GetWeaponAttachPoint(OwningPawn, WeaponType);
-	USkeletalMeshComponent* PawnMesh1P = IPlayerInterface::Execute_GetMesh1P(OwningPawn);
-	USkeletalMeshComponent* PawnMesh3P = IPlayerInterface::Execute_GetMesh3P(OwningPawn);
+	const FName AttachPoint = IPlayerInterface::Execute_GetWeaponAttachPoint(Pawn, WeaponType);
+	USkeletalMeshComponent* PawnMesh1P = IPlayerInterface::Execute_GetMesh1P(Pawn);
+	USkeletalMeshComponent* PawnMesh3P = IPlayerInterface::Execute_GetMesh3P(Pawn);
 	// 2.通过角色的握把点，绑定武器
 	// 3.虽说同时绑定到PawnMesh1P、PawnMesh3P上，但是当某个网格不可见时，绑定就会失败
 	Mesh1P->AttachToComponent(PawnMesh1P, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);

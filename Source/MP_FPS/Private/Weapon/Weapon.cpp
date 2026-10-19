@@ -171,6 +171,15 @@ void AWeapon::AttachToOwningPawn(APawn* Pawn) const
 	Mesh3P->AttachToComponent(PawnMesh3P, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
 }
 
+void AWeapon::DetachFromOwningPawn()
+{
+	Mesh1P->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+	Mesh1P->SetHiddenInGame(true);
+
+	Mesh3P->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+	Mesh3P->SetHiddenInGame(true);
+}
+
 /**
  * 这个函数会在各种机器上本地执行，不只在你当前控制的那台机器上
  * 确实在本地控制的机器上调用它，比如在响应玩家输入的时候

@@ -144,6 +144,36 @@ void UCombatComponent::Multicast_CycleWeapon_Implementation(int32 WeaponIndex)
 	}
 }
 
+void UCombatComponent::Notify_CycleWeapon()
+{
+	if (!IsValid(CurrentWeapon)) return;
+
+	AWeapon* NewWeapon = Inventory[Local_WeaponIndex];
+	if (IsValid(NewWeapon))
+	{
+		EquipWeapon(NewWeapon);
+	}
+}
+
+void UCombatComponent::BlendOut_CycleWeapon(UAnimMontage* Montage, bool bInterrupted)
+{
+	UAnimInstance* AnimInstance = IPlayerInterface::Execute_GetMesh1P(GetOwner())->GetAnimInstance();
+	if (IsValid(AnimInstance) && AnimInstance->OnMontageBlendingOut.IsAlreadyBound(this, &ThisClass::BlendOut_CycleWeapon))
+	{
+		AnimInstance->OnMontageBlendingOut.RemoveDynamic(this, &ThisClass::BlendOut_CycleWeapon); // 解除绑定
+	}
+
+	CurrentWeapon->WeaponStatus = EWeaponStatus::Idle;
+
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		5.f,
+		FColor::Yellow,
+		TEXT("BlendOut_CycleWeapon()"),
+		false
+	);
+}
+
 // Local_CycleWeapon
 	// Play the equip montage of the weapon at WeaponIndex
 		// if locally-controlled, play the 1P, otherwise play the 3P
@@ -303,36 +333,6 @@ void UCombatComponent::Initiate_Aim_Released()
 	Server_Aim(false);// 向服务器发送瞄准值
 }
 
-void UCombatComponent::Notify_CycleWeapon()
-{
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Cyan,
-		TEXT("Notify_CycleWeapon()"),
-		false
-	);
-}
-
-void UCombatComponent::BlendOut_CycleWeapon(UAnimMontage* Montage, bool bInterrupted)
-{
-	UAnimInstance* AnimInstance = IPlayerInterface::Execute_GetMesh1P(GetOwner())->GetAnimInstance();
-	if (IsValid(AnimInstance) && AnimInstance->OnMontageBlendingOut.IsAlreadyBound(this, &ThisClass::BlendOut_CycleWeapon) )
-	{
-		AnimInstance->OnMontageBlendingOut.RemoveDynamic(this, &ThisClass::BlendOut_CycleWeapon); // 解除绑定
-	}
-
-	CurrentWeapon->WeaponStatus = EWeaponStatus::Idle;
-
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Yellow,
-		TEXT("BlendOut_CycleWeapon()"),
-		false
-	);
-}
-
 // 服务器RPC : 在客户端上调用函数，并在服务器上执行
 void UCombatComponent::Server_Aim_Implementation(bool bPressed)
 {
@@ -364,6 +364,53 @@ void UCombatComponent::Equip(AWeapon* Weapon)
 	CurrentReserveAmmo = ReserveAmmo.FindChecked(CurrentWeapon->WeaponType);
 	// 广播当前武器备用弹药量和武器的弹药量、武器图标材质
 	OnCurrentReserveAmmoChanged.Broadcast(CurrentReserveAmmo, Weapon->Ammo, CurrentWeapon->WeaponIcon);
+}
+
+void UCombatComponent::EquipWeapon(AWeapon* Weapon)
+{
+	if (!IsValid(Weapon) || !IsValid(GetOwner())) return;
+	if (GetOwner()->GetLocalRole() == ROLE_Authority)
+	{
+		 SetCurrentWeapon(Weapon, CurrentWeapon);
+	}
+	else
+	{
+		Server_EquipWeapon(Weapon);
+	}
+}
+
+void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
+{
+	EquipWeapon(Weapon);
+}
+
+void UCombatComponent::SetCurrentWeapon(AWeapon* NewWeapon, AWeapon* LastWeapon)
+{
+	AWeapon* LocalLastWeapon = nullptr;
+
+	if (IsValid(LastWeapon))
+	{
+		LocalLastWeapon = LastWeapon;
+	}
+	else if (NewWeapon != CurrentWeapon)
+	{
+		LocalLastWeapon = CurrentWeapon;
+	}
+
+	if (IsValid(LocalLastWeapon))
+	{
+		LocalLastWeapon->DetachFromOwningPawn();
+		LocalLastWeapon->WeaponStatus = EWeaponStatus::Unequipped;
+	}
+
+	CurrentWeapon = NewWeapon;
+	APawn* OwningPawn = Cast<APawn>(GetOwner());
+	if (IsValid(OwningPawn) && OwningPawn->HasAuthority() && IsValid(CurrentWeapon))
+	{
+		CurrentReserveAmmo = ReserveAmmo.FindChecked(CurrentWeapon->WeaponType);
+	}
+
+	CurrentWeapon->AttachToOwningPawn(OwningPawn);
 }
 
 // SpawnInventory() 函数只会在服务器上实例化武器
@@ -420,8 +467,8 @@ void UCombatComponent::DestroyInventory()
 
 void UCombatComponent::OnRep_CurrentWeapon(AWeapon* LastWeapon)
 {
-	if (!IsValid(CurrentWeapon)) return;
-	CurrentWeapon->AttachToOwningPawn(Cast<APawn>(GetOwner()));
+	SetCurrentWeapon(CurrentWeapon, LastWeapon);
+
 	IPlayerInterface::Execute_WeaponReplicated(GetOwner());
 	InitializeWeaponWidgets();
 

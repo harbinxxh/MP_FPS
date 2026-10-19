@@ -78,6 +78,10 @@ public:
 
 	// 装备武器函数，只能在服务器上执行
 	void Equip(AWeapon* Weapon);
+	void EquipWeapon(AWeapon* Weapon);
+	// 装备武器的服务器RPC
+	UFUNCTION(Server, Reliable)
+	void Server_EquipWeapon(AWeapon* Weapon);
 
 	// 生成物品栏函数
 	// SpawnInventory() 函数只会在服务器上实例化武器
@@ -148,6 +152,8 @@ private:
 	*/
 	UFUNCTION()
 	void OnRep_CurrentWeapon(AWeapon* LastWeapon);
+	// 装备新武器，解绑旧武器
+	void SetCurrentWeapon(AWeapon* NewWeapon, AWeapon* LastWeapon);
 
 	// 保存生成的武器指针数组
 	// 网络复制数组：Transient 标记为瞬态，不能保存到硬盘上

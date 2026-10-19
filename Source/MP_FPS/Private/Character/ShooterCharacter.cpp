@@ -324,6 +324,12 @@ int32 AShooterCharacter::GetReserveAmmo_Implementation() const
 	return Combat->CurrentReserveAmmo;
 }
 
+void AShooterCharacter::Notify_CycleWeapon_Implementation()
+{
+	// 现在就能在响应动画通知时调用它了
+	Combat->Notify_CycleWeapon();
+}
+
 void AShooterCharacter::Input_CycleWeapon()
 {
 	Combat->Initiate_CycleWeapon();

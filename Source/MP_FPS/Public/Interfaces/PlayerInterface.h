@@ -47,4 +47,8 @@ public:
 	// 获取当前武器的备用弹药量
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	int32 GetReserveAmmo() const;
+
+	// 动画蓝图中调用的动画通知函数：武器切换动画通知函数
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void Notify_CycleWeapon();
 };

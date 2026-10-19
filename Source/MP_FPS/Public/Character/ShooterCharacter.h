@@ -42,7 +42,9 @@ public:
 	virtual USkeletalMeshComponent* GetMesh3P_Implementation() const;
 	virtual void WeaponReplicated_Implementation() override;
 	virtual AWeapon* GetCurrentWeapon_Implementation() override;
-	virtual int32 GetReserveAmmo_Implementation() const;
+	virtual int32 GetReserveAmmo_Implementation() const override;
+	// 动画蓝图中调用的动画通知函数：武器切换动画通知函数
+	virtual void Notify_CycleWeapon_Implementation() override;
 	/** ~PlayerInterface */
 
 	virtual void BeginPlay() override;

@@ -46,6 +46,9 @@ public:
 	void Initiate_Aim_Pressed();		// 瞄准按下
 	void Initiate_Aim_Released();		// 瞄准释放
 
+	// 动画蓝图中调用的动画通知函数：武器切换响应动画通知函数，实际进行武器切换的位置
+	void Notify_CycleWeapon();
+
 	// 广播准星材质
 	UPROPERTY(BlueprintAssignable)
 	FReticleChanged OnReticleChanged;
@@ -114,6 +117,10 @@ protected:
 	// 射线长度
 	UPROPERTY(EditDefaultsOnly, Category = "FPS|Weapon")
 	float TraceLength;
+
+	// 武器切换：动画蒙太奇淡出时的通知函数
+	UFUNCTION()
+	void BlendOut_CycleWeapon(UAnimMontage* Montage, bool bInterrupted);
 
 private:
 	/**

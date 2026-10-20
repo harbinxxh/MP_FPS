@@ -98,6 +98,12 @@ void UCombatComponent::Initiate_CycleWeapon()
 	Local_CycleWeapon(Local_WeaponIndex);
 }
 
+// Local_CycleWeapon
+	// Play the equip montage of the weapon at WeaponIndex
+		// if locally-controlled, play the 1P, otherwise play the 3P
+	// if locally controlled Server_cycleweapon()
+	// Set the WeaponStatus on CurrentWeapon to Cycling
+
 void UCombatComponent::Local_CycleWeapon(int32 WeaponIndex)
 {
 	// 通过武器索引获取武器
@@ -126,11 +132,19 @@ void UCombatComponent::Local_CycleWeapon(int32 WeaponIndex)
 	}
 }
 
+// Server_Cycleweapon
+	// Set the local weapon index
+	// Multicast_cycleWeapon(weaponIndex)
+
 void UCombatComponent::Server_CycleWeapon_Implementation(int32 WeaponIndex)
 {
 	Local_WeaponIndex = WeaponIndex;
 	Multicast_CycleWeapon(WeaponIndex);
 }
+
+// Multicast_Cycleweapon
+	// Set local weapon index
+	// Local_Cycleweapon(WeaponIndex)
 
 void UCombatComponent::Multicast_CycleWeapon_Implementation(int32 WeaponIndex)
 {
@@ -165,29 +179,15 @@ void UCombatComponent::BlendOut_CycleWeapon(UAnimMontage* Montage, bool bInterru
 
 	CurrentWeapon->WeaponStatus = EWeaponStatus::Idle;
 
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Yellow,
-		TEXT("BlendOut_CycleWeapon()"),
-		false
-	);
+	OnReticleChanged.Broadcast(CurrentWeapon->GetReticleDynamicMaterialInstance(), CurrentWeapon->ReticleParams, bHitPlayer);
+	OnAmmoCounterChanged.Broadcast(CurrentWeapon->GetAmmoCounterDynamicMaterialInstance(), CurrentWeapon->Ammo, CurrentWeapon->MagCapacity);
+	OnCurrentReserveAmmoChanged.Broadcast(CurrentReserveAmmo, CurrentWeapon->Ammo, CurrentWeapon->WeaponIcon);
+
+	if (bTriggerPressed && CurrentWeapon->FireType == EFireType::Auto && CurrentWeapon->Ammo > 0)
+	{
+		Local_FireWeapon();
+	}
 }
-
-// Local_CycleWeapon
-	// Play the equip montage of the weapon at WeaponIndex
-		// if locally-controlled, play the 1P, otherwise play the 3P
-	// if locally controlled Server_cycleweapon()
-	// Set the WeaponStatus on CurrentWeapon to Cycling
-
-// Server_Cycleweapon
-	// Set the local weapon index
-	// Multicast_cycleWeapon(weaponIndex)
-
-// Multicast_Cycleweapon
-	// Set local weapon index
-	// Local_Cycleweapon(WeaponIndex)
-
 
 void UCombatComponent::Initiate_FireWeapon_Pressed()
 {
@@ -195,7 +195,7 @@ void UCombatComponent::Initiate_FireWeapon_Pressed()
 
 	bTriggerPressed = true;
 
-	if (CurrentWeapon->Ammo > 0)
+	if (CurrentWeapon->WeaponStatus == EWeaponStatus::Idle && CurrentWeapon->Ammo > 0)
 	{
 		Local_FireWeapon();
 	}

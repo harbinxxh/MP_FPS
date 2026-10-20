@@ -45,7 +45,7 @@ AWeapon::AWeapon()
 	Ammo = 5;
 	StartingCarriedAmmo = 10;
 	Sequence = 0;
-	WeaponStatus = EWeaponStatus::Unequipped;
+	WeaponStatus = EWeaponStatus::Idle;
 }
 
 // 在 OnRep_Instigator() 函数里，调用 AttachToOwningPawn() 函数，为玩家角色绑定武器
@@ -133,17 +133,7 @@ void AWeapon::WeaponTrace(FHitResult& OutHit, float TraceLength)
 			OutHit.ImpactPoint = End; // 如果未击中，就将击中点设为 End 点，也就是射线末端
 		}
 
-		//DrawDebugSphereTraceSingle(
-		//	GetWorld(),
-		//	Start,
-		//	End,
-		//	TraceRadius,
-		//	EDrawDebugTrace::ForDuration,
-		//	bHit,
-		//	OutHit,
-		//	FColor::Green,
-		//	FColor::Red,
-		//	5.f);
+		//DrawDebugSphereTraceSingle( GetWorld(), Start, End, TraceRadius, EDrawDebugTrace::ForDuration, bHit, OutHit, FColor::Green, FColor::Red, 5.f);
 	}
 }
 

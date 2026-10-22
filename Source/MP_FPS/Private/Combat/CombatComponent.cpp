@@ -207,6 +207,9 @@ void UCombatComponent::Local_FireWeapon()
 	if (!IsValid(CurrentWeapon)) return;
 	ensure(IsValid(WeaponData));
 
+	// 正在射击的武器，将武器状态设为开火状态
+	CurrentWeapon->WeaponStatus = EWeaponStatus::Firing;
+
 	// 获取第一人称开火蒙太奇 - play the fire weapon montage for the first-person meshs
 	UAnimMontage* Montage1P = WeaponData->FirstPersonMontages.FindChecked(CurrentWeapon->WeaponType).FireMontage;
 
@@ -260,6 +263,11 @@ void UCombatComponent::FireTimerFinished()
 {
 	if (!IsValid(CurrentWeapon)) return;
 
+	if (CurrentWeapon->WeaponStatus == EWeaponStatus::Firing)
+	{
+		CurrentWeapon->WeaponStatus = EWeaponStatus::Idle;
+	}
+
 	if (bTriggerPressed && CurrentWeapon->FireType == EFireType::Auto && CurrentWeapon->Ammo > 0)
 	{
 		Local_FireWeapon();
@@ -269,6 +277,8 @@ void UCombatComponent::FireTimerFinished()
 void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& Hit)
 {
 	if (!IsValid(CurrentWeapon)) return;
+
+	if (CurrentWeapon->Ammo <= 0) return;
 
 	// 只在特定条件下执行
 	// 1、不是 ListenServer 服务器，在监听服务器模式下且处于本地控制状态，那说明就是主机，而且我们就是触发本地开火的玩家，所以弹药已设为自身减一

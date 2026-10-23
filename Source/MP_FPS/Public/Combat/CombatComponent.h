@@ -42,7 +42,7 @@ public:
 	void Initiate_CycleWeapon();		// 切换武器
 	void Initiate_FireWeapon_Pressed(); // 连续开火按下
 	void Initiate_FireWeapon_Released();// 连续开火释放
-	void Initiate_ReloadWeapon();		// 弹药装填
+	void Initiate_ReloadWeapon();		// 装填弹药
 	void Initiate_Aim_Pressed();		// 瞄准按下
 	void Initiate_Aim_Released();		// 瞄准释放
 
@@ -199,14 +199,25 @@ private:
 	// 武器数组中的索引值,每次切换武器时，都会更新这个索引
 	int32 Local_WeaponIndex;
 
-	// 本地触发武器切换函数
+	// 本地触发武器切换函数，用来播放动画片段
 	void Local_CycleWeapon(int32 WeaponIndex);
 
-	// 服务器端RPC：触发武器切换函数
+	// 服务器端切换武器RPC
 	UFUNCTION(Server, Reliable)
 	void Server_CycleWeapon(int32 WeaponIndex);
 
 	// 网络多播，服务器调用客户端执行
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_CycleWeapon(int32 WeaponIndex);
+
+	// 本地装填武器的函数，用来播放动画片段
+	void Local_ReloadWeapon();
+
+	// 服务器端装填/换弹RPC
+	UFUNCTION(Server, Reliable)
+	void Server_ReloadWeapon();
+
+	// 网络多播，服务器调用客户端执行
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ReloadWeapo(int32 NewWeaponAmmo, int32 NewCarriedAmmo);
 };

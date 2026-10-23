@@ -48,6 +48,8 @@ public:
 
 	// 动画蓝图中调用的动画通知函数：武器切换响应动画通知函数，实际进行武器切换的位置
 	void Notify_CycleWeapon();
+	// 动画蓝图中调用的动画通知函数：武器装填响应动画通知函数
+	void Notify_ReloadWeapon();
 
 	// 广播准星材质
 	UPROPERTY(BlueprintAssignable)
@@ -217,7 +219,11 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_ReloadWeapon();
 
+	// 客户端装填/换弹RPC
+	UFUNCTION(Client, Reliable)
+	void Client_ReloadWeapon(int32 NewWeaponAmmo, int32 NewCarriedAmmo);
+
 	// 网络多播，服务器调用客户端执行
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_ReloadWeapo(int32 NewWeaponAmmo, int32 NewCarriedAmmo);
+	void Multicast_ReloadWeapo();
 };

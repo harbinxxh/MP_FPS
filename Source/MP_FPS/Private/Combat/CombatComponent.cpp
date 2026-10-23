@@ -169,6 +169,42 @@ void UCombatComponent::Notify_CycleWeapon()
 	}
 }
 
+void UCombatComponent::Notify_ReloadWeapon()
+{
+	if (!IsValid(CurrentWeapon)) return;
+	if (GetNetMode() == NM_ListenServer || GetNetMode() == NM_DedicatedServer || GetNetMode() == NM_Standalone)
+	{
+		const int32 EmptySpace = CurrentWeapon->MagCapacity - CurrentWeapon->Ammo;
+		const int32 AmountToRefill = FMath::Min(EmptySpace, CurrentReserveAmmo); // 补弹量
+		CurrentWeapon->Ammo += AmountToRefill;
+		ReserveAmmo[CurrentWeapon->WeaponType] = ReserveAmmo[CurrentWeapon->WeaponType] - AmountToRefill;
+		CurrentReserveAmmo = ReserveAmmo[CurrentWeapon->WeaponType];
+		// 客户端RPC
+		Client_ReloadWeapon(CurrentWeapon->Ammo, CurrentReserveAmmo);
+	}
+		
+	CurrentWeapon->WeaponStatus = EWeaponStatus::Idle;
+	if (bTriggerPressed && CurrentWeapon->Ammo > 0)
+	{
+		Local_FireWeapon();
+	}
+}
+
+void UCombatComponent::Client_ReloadWeapon_Implementation(int32 NewWeaponAmmo, int32 NewCarriedAmmo)
+{
+	APawn* OwningPawn = Cast<APawn>(GetOwner());
+	if (!IsValid(CurrentWeapon) || !IsValid(OwningPawn)) return;
+
+	if (OwningPawn->IsLocallyControlled())
+	{
+		CurrentWeapon->Ammo = NewWeaponAmmo;
+		CurrentReserveAmmo = NewCarriedAmmo;
+
+		OnAmmoCounterChanged.Broadcast(CurrentWeapon->GetAmmoCounterDynamicMaterialInstance(), CurrentWeapon->Ammo, CurrentWeapon->MagCapacity);
+		OnCurrentReserveAmmoChanged.Broadcast(CurrentReserveAmmo, CurrentWeapon->Ammo, CurrentWeapon->WeaponIcon);
+	}
+}
+
 void UCombatComponent::BlendOut_CycleWeapon(UAnimMontage* Montage, bool bInterrupted)
 {
 	UAnimInstance* AnimInstance = IPlayerInterface::Execute_GetMesh1P(GetOwner())->GetAnimInstance();
@@ -328,7 +364,7 @@ void UCombatComponent::Initiate_ReloadWeapon()
 {
 	if (!IsValid(CurrentWeapon)) return;
 	if (CurrentWeapon->WeaponStatus == EWeaponStatus::Cycling || CurrentWeapon->WeaponStatus == EWeaponStatus::Reloading) return;
-	if (CurrentWeapon->Ammo == 0) return;
+	if (CurrentReserveAmmo == 0) return;
 	
 	Local_ReloadWeapon();	// 本地装填武器的函数，用来播放动画片段
 	Server_ReloadWeapon();	// 服务器装填RPC
@@ -361,10 +397,10 @@ void UCombatComponent::Local_ReloadWeapon()
 
 void UCombatComponent::Server_ReloadWeapon_Implementation()
 {
-	Multicast_ReloadWeapo(CurrentWeapon->Ammo, CurrentReserveAmmo);
+	Multicast_ReloadWeapo();
 }
 
-void UCombatComponent::Multicast_ReloadWeapo_Implementation(int32 NewWeaponAmmo, int32 NewCarriedAmmo)
+void UCombatComponent::Multicast_ReloadWeapo_Implementation()
 {
 	Local_ReloadWeapon();
 }

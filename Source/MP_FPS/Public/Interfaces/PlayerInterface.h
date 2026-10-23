@@ -51,4 +51,8 @@ public:
 	// 动画蓝图中调用的动画通知函数：武器切换动画通知函数
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Notify_CycleWeapon();
+
+	// 动画蓝图中调用的动画通知函数：武器装填动画通知函数
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void Notify_ReloadWeapon();
 };

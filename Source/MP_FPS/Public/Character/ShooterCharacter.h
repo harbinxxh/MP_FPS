@@ -45,6 +45,8 @@ public:
 	virtual int32 GetReserveAmmo_Implementation() const override;
 	// 动画蓝图中调用的动画通知函数：武器切换动画通知函数
 	virtual void Notify_CycleWeapon_Implementation() override;
+	// 动画蓝图中调用的动画通知函数：武器装填动画通知函数
+	virtual void Notify_ReloadWeapon_Implementation() override;
 	/** ~PlayerInterface */
 
 	virtual void BeginPlay() override;

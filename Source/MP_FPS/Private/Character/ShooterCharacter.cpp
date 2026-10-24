@@ -335,6 +335,15 @@ void AShooterCharacter::Notify_ReloadWeapon_Implementation()
 	Combat->Notify_ReloadWeapon();
 }
 
+void AShooterCharacter::AddAmmo_Implementation(const FGameplayTag& WeaponType, int32 AmmoAmount)
+{
+	// 只有服务器才能添加弹药
+	if (HasAuthority() && IsValid(Combat))
+	{
+		Combat->AddAmmo(WeaponType, AmmoAmount);
+	}
+}
+
 void AShooterCharacter::Input_CycleWeapon()
 {
 	Combat->Initiate_CycleWeapon();

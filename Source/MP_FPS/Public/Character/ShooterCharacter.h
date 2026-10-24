@@ -47,6 +47,8 @@ public:
 	virtual void Notify_CycleWeapon_Implementation() override;
 	// 动画蓝图中调用的动画通知函数：武器装填动画通知函数
 	virtual void Notify_ReloadWeapon_Implementation() override;
+	// 添加弹药
+	virtual void AddAmmo_Implementation(const FGameplayTag& WeaponType, int32 AmmoAmount) override;
 	/** ~PlayerInterface */
 
 	virtual void BeginPlay() override;

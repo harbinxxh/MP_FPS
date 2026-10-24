@@ -50,6 +50,8 @@ public:
 	void Notify_CycleWeapon();
 	// 动画蓝图中调用的动画通知函数：武器装填响应动画通知函数
 	void Notify_ReloadWeapon();
+	// 添加弹药
+	void AddAmmo(const FGameplayTag& WeaponType, int32 AmmoAmount);
 
 	// 广播准星材质
 	UPROPERTY(BlueprintAssignable)

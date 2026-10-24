@@ -185,7 +185,10 @@ void AWeapon::Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal
 		// 限制范围就定在0到弹匣容量之间
 		// 本地:弹药数减一，序列值加一
 		Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
-		++Sequence;
+		if (!GetInstigator()->HasAuthority())
+		{
+			++Sequence;
+		}
 	}
 }
 
@@ -199,7 +202,7 @@ void AWeapon::Rep_Fire(int32 AuthAmmo)
 {
 	// 只在拥有控制权时才执行
 	// 客户端：把弹药数设为 auth ammo，序列号减1，再根据序列号递减弹药
-	if (GetInstigator()->IsLocallyControlled())
+	if (GetInstigator()->IsLocallyControlled() && !GetInstigator()->HasAuthority())
 	{
 		Ammo = AuthAmmo;
 		--Sequence;

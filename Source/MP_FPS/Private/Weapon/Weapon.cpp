@@ -178,13 +178,14 @@ void AWeapon::Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal
 {
 	FireEffects(ImpactPoint, ImpactNormal, ImpactSurfaceType, bIsFirstPerson);
 
-	// 只在自己拥有控制权时才这么做
 	// 只对本地控制的玩家执行弹药预测，只有本地控制的玩家才能看到自己有多少弹药
 	if (GetInstigator()->IsLocallyControlled())
 	{
 		// 限制范围就定在0到弹匣容量之间
 		// 本地:弹药数减一，序列值加一
 		Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
+
+		// 在监听服务器上，根本不需要用序列计数来改弹药
 		if (!GetInstigator()->HasAuthority())
 		{
 			++Sequence;
@@ -200,9 +201,8 @@ void AWeapon::Auth_Fire()
 
 void AWeapon::Rep_Fire(int32 AuthAmmo)
 {
-	// 只在拥有控制权时才执行
-	// 客户端：把弹药数设为 auth ammo，序列号减1，再根据序列号递减弹药
-	if (GetInstigator()->IsLocallyControlled() && !GetInstigator()->HasAuthority())
+	// 本地控制客户端：把弹药数设为 auth ammo，序列号减1，再根据序列号递减弹药
+	if (GetInstigator()->IsLocallyControlled() && !GetInstigator()->HasAuthority()) // 在监听服务器上，根本不需要用序列计数来改弹药
 	{
 		Ammo = AuthAmmo;
 		--Sequence;

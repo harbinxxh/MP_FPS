@@ -59,4 +59,8 @@ public:
 	// 添加弹药
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void AddAmmo(const FGameplayTag& WeaponType, int32 AmmoAmount);
+
+	// 造成伤害
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	bool DoDamage(float DamageAmount, AActor* DamageInstigator);
 };

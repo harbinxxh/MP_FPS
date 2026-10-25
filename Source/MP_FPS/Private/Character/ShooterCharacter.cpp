@@ -344,6 +344,20 @@ void AShooterCharacter::AddAmmo_Implementation(const FGameplayTag& WeaponType, i
 	}
 }
 
+bool AShooterCharacter::DoDamage_Implementation(float DamageAmount, AActor* DamageInstigator)
+{
+	// Change Health by DamageAmount
+	// 根据伤害量改变生命值
+	
+	// Play a Hit React montage	(also multicast hit react)
+	// 播放命中反应蒙太奇（同时进行多播命中反应）
+	
+	// calculate whether or not damage was leathal
+	// 计算伤害是否致命
+
+	return false;
+}
+
 void AShooterCharacter::Input_CycleWeapon()
 {
 	Combat->Initiate_CycleWeapon();

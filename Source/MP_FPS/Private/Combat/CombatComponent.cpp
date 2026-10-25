@@ -346,8 +346,13 @@ void UCombatComponent::FireTimerFinished()
 void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& Hit)
 {
 	if (!IsValid(CurrentWeapon)) return;
-
 	if (CurrentWeapon->Ammo <= 0) return;
+
+	// 计算伤害
+	if (IsValid(Hit.GetActor()) && Hit.GetActor()->Implements<UPlayerInterface>())
+	{
+		IPlayerInterface::Execute_DoDamage(Hit.GetActor(), 0.f, GetOwner());
+	}
 
 	// 只在特定条件下执行
 	// 1、不是 ListenServer 服务器，在监听服务器模式下且处于本地控制状态，那说明就是主机，而且我们就是触发本地开火的玩家，所以弹药已设为自身减一

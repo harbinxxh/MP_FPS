@@ -349,13 +349,29 @@ bool AShooterCharacter::DoDamage_Implementation(float DamageAmount, AActor* Dama
 	// Change Health by DamageAmount
 	// 根据伤害量改变生命值
 	
+
 	// Play a Hit React montage	(also multicast hit react)
 	// 播放命中反应蒙太奇（同时进行多播命中反应）
-	
+	const int32 MontageSelection = FMath::RandRange(0, HitReacts.Num() - 1);
+	Multicast_HitReact(MontageSelection);
+
+
 	// calculate whether or not damage was leathal
 	// 计算伤害是否致命
 
 	return false;
+}
+
+void AShooterCharacter::Multicast_HitReact_Implementation(int32 MontageIndex)
+{
+	// 只给第三人称网格配备了受击反应动画, 主要用在打中别人的时候,也不适合在第一人称网格上给自己播放蒙太奇
+	if (GetNetMode() != NM_DedicatedServer && !IsLocallyControlled())
+	{
+		if (HitReacts.IsValidIndex(MontageIndex))
+		{
+			GetMesh()->GetAnimInstance()->Montage_Play(HitReacts[MontageIndex]);
+		}
+	}
 }
 
 void AShooterCharacter::Input_CycleWeapon()

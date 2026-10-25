@@ -49,7 +49,7 @@ public:
 	virtual void Notify_ReloadWeapon_Implementation() override;
 	// 添加弹药
 	virtual void AddAmmo_Implementation(const FGameplayTag& WeaponType, int32 AmmoAmount) override;
-	// 造成伤害
+	// 造成伤害：伤害判定必须由服务器计算
 	virtual bool DoDamage_Implementation(float DamageAmount, AActor* DamageInstigator) override;
 	/** ~PlayerInterface */
 
@@ -74,6 +74,10 @@ public:
 	FWeaponFirstReplicated OnWeaponFirstReplicated;
 
 	bool HasWeaponFirstReplicated() const { return bWeaponFirstReplicated; }
+
+	// 受击反应蒙太奇数组
+	UPROPERTY(EditDefaultsOnly, Category = "FPS|HitReact")
+	TArray<TObjectPtr<UAnimMontage>> HitReacts;
 
 protected:
 	// BlueprintReadOnly 默认不能作用于 private 私有成员内
@@ -103,6 +107,10 @@ protected:
 	// 旋转状态
 	UPROPERTY(BlueprintReadOnly, Category = "FPS|TurnInPlace")
 	ETurningInPlace TurningStatus;
+
+	// 创建网络多播RPC，让所有客户端同步播放受击动画
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_HitReact(int32 MontageIndex);
 
 private:
 

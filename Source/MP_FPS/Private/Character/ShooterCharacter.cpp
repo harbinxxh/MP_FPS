@@ -10,6 +10,8 @@
 #include "Data/WeaponData.h"
 #include "Weapon/Weapon.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Health/HealthComponent.h"
+
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -65,6 +67,9 @@ AShooterCharacter::AShooterCharacter()
 
 	Combat = CreateDefaultSubobject<UCombatComponent>("Combat");
 	Combat->SetIsReplicated(true);// 开启组件复制功能
+
+	Health = CreateDefaultSubobject<UHealthComponent>("Health");
+	Health->SetIsReplicated(true);// 开启组件复制功能
 
 	// 角色默认视野值
 	DefaultFieldOfView = 90.0f;

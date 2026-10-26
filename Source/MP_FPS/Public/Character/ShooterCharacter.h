@@ -13,6 +13,8 @@ class UCameraComponent;
 class UCombatComponent;
 class UInputAction;
 class AWeapon;
+class UHealthComponent;
+
 
 // 定义一个委托，用来在武器首次复制时触发广播
 // 声明一个动态多播委托，带一个参数（这个参数就是刚复制完成的武器）
@@ -80,6 +82,9 @@ public:
 	TArray<TObjectPtr<UAnimMontage>> HitReacts;
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Health")
+	TObjectPtr<UHealthComponent> Health;
+
 	// BlueprintReadOnly 默认不能作用于 private 私有成员内
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Combat")
 	TObjectPtr<UCombatComponent> Combat;

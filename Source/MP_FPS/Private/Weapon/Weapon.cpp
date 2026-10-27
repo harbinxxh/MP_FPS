@@ -46,6 +46,7 @@ AWeapon::AWeapon()
 	StartingCarriedAmmo = 10;
 	Sequence = 0;
 	WeaponStatus = EWeaponStatus::Idle;
+	Damage = 15.f;
 }
 
 // 在 OnRep_Instigator() 函数里，调用 AttachToOwningPawn() 函数，为玩家角色绑定武器

@@ -33,7 +33,7 @@ public:
 	static UHealthComponent* FindHealthComponent(const AActor* Actor) { return (IsValid(Actor) ? Actor->FindComponentByClass<UHealthComponent>() : nullptr); }
 
 	// 最大生命值比例
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	float GetHealthNormalized() const;
 	
 	// 修改健康值 (return true if lethal 如果致命则返回 true)
@@ -44,10 +44,10 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_DeathState)
 	EDeathState DeathState;
 
-	UPROPERTY(ReplicatedUsing = OnRep_Health)
+	UPROPERTY(ReplicatedUsing = OnRep_Health, EditDefaultsOnly, Category = "FPS|Health")
 	float Health;
 
-	UPROPERTY(ReplicatedUsing = OnRep_MaxHealth)
+	UPROPERTY(ReplicatedUsing = OnRep_MaxHealth, EditDefaultsOnly, Category = "FPS|Health")
 	float MaxHealth;
 
 	// 广播健康值

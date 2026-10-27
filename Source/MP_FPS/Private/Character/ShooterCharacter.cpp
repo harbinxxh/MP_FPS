@@ -351,17 +351,15 @@ void AShooterCharacter::AddAmmo_Implementation(const FGameplayTag& WeaponType, i
 
 bool AShooterCharacter::DoDamage_Implementation(float DamageAmount, AActor* DamageInstigator)
 {
-	// Change Health by DamageAmount
+	if (!IsValid(Health)) return false;
 	// 根据伤害量改变生命值
-	
+	Health->ChangeHealthByAmount(-DamageAmount, DamageInstigator);
 
-	// Play a Hit React montage	(also multicast hit react)
-	// 播放命中反应蒙太奇（同时进行多播命中反应）
+	// 播放命中反应蒙太奇（同时进行多播命中反应）Play a Hit React montage	(also multicast hit react)
 	const int32 MontageSelection = FMath::RandRange(0, HitReacts.Num() - 1);
 	Multicast_HitReact(MontageSelection);
 
-
-	// calculate whether or not damage was leathal
+	// calculate whether or not damage was lethal
 	// 计算伤害是否致命
 
 	return false;

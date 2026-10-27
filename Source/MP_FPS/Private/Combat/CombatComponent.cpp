@@ -351,7 +351,7 @@ void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& Hit)
 	// 计算伤害
 	if (IsValid(Hit.GetActor()) && Hit.GetActor()->Implements<UPlayerInterface>())
 	{
-		IPlayerInterface::Execute_DoDamage(Hit.GetActor(), 0.f, GetOwner());
+		IPlayerInterface::Execute_DoDamage(Hit.GetActor(), CurrentWeapon->Damage, GetOwner());
 	}
 
 	// 只在特定条件下执行

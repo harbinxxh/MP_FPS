@@ -20,6 +20,9 @@ class MP_FPS_API AShooterPlayerController : public APlayerController
 public:
 	AShooterPlayerController();
 
+	// Pawn 死亡状态
+	bool bPawnAlive;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;

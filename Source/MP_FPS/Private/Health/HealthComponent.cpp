@@ -34,8 +34,28 @@ bool UHealthComponent::ChangeHealthByAmount(float Amount, AActor* Instigator)
 	float OldValue = Health;
 	Health = FMath::Clamp(Health + Amount, 0.f, MaxHealth);
 	OnHealthChanged.Broadcast(this, OldValue, Health, Instigator);
-	// Check if lethal -> Start Death
+
+	// 如果造成致命伤害，触发启动死亡函数 Check if lethal -> Start Death
+	if (Health <= 0.f)
+	{
+		StartDeath();
+	}
+
 	return false;
+}
+
+void UHealthComponent::StartDeath()
+{
+	if (DeathState != EDeathState::NotDead)
+	{
+		return;
+	}
+
+	DeathState = EDeathState::DeathStarted;
+	OnDeathStarted.Broadcast();
+	// 因为死亡状态是复制的,需要强制让所有者立刻开始复制，以便让健康组件的复制通知尽早触发
+	// 射击角色在客户端也能响应，我们可以在所属角色上强制网络更新
+	GetOwner()->ForceNetUpdate();
 }
 
 void UHealthComponent::ChangeMaxHealthByAmount(float Amount, AActor* Instigator)
@@ -53,6 +73,10 @@ void UHealthComponent::BeginPlay()
 
 void UHealthComponent::OnRep_DeathState(EDeathState OldDeathState)
 {
+	if (DeathState == EDeathState::DeathStarted)
+	{
+		OnDeathStarted.Broadcast();
+	}
 }
 
 void UHealthComponent::OnRep_Health(float OldValue)

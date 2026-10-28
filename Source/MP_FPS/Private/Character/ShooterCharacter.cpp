@@ -11,6 +11,9 @@
 #include "Weapon/Weapon.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Health/HealthComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "MP_FPS/MP_FPS.h"
+#include "Player/ShooterPlayerController.h"
 
 
 AShooterCharacter::AShooterCharacter()
@@ -81,10 +84,16 @@ void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	Health->OnDeathStarted.AddDynamic(this, &ThisClass::OnDeathStarted);
+
 	// 设置透视模式下的水平视野（以度为单位）（正交模式下忽略）
 	FirstPersonCamera->SetFieldOfView(DefaultFieldOfView);
-
 	StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+	
+	if (AShooterPlayerController* PC = Cast<AShooterPlayerController>(GetController()); IsValid(PC))
+	{
+		PC->bPawnAlive = true;
+	}
 }
 
 void AShooterCharacter::BeginDestroy()
@@ -375,6 +384,30 @@ void AShooterCharacter::Multicast_HitReact_Implementation(int32 MontageIndex)
 			GetMesh()->GetAnimInstance()->Montage_Play(HitReacts[MontageIndex]);
 		}
 	}
+}
+
+// 先播放死亡动画序列，最后再销毁并重生角色
+// 播放死亡动画时，要禁用输入，还要关闭碰撞
+// 重生稍后处理
+void AShooterCharacter::OnDeathStarted()
+{
+	if (GetNetMode() != NM_DedicatedServer)
+	{
+		DeathEffects();
+		if (AShooterPlayerController* PC = Cast<AShooterPlayerController>(GetController()); IsValid(PC))
+		{
+			DisableInput(PC); // 要禁用输入
+			if (PC->IsLocalController())
+			{
+				PC->bPawnAlive = false;
+			}
+		}
+	}
+
+	// 禁用胶囊碰撞体和网格模型的碰撞
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(FPSTraceChannels::ECC_Weapon, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(FPSTraceChannels::ECC_Weapon, ECR_Ignore);
 }
 
 void AShooterCharacter::Input_CycleWeapon()

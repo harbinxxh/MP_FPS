@@ -9,6 +9,8 @@
 // 广播健康值
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FHealthChanged, UHealthComponent*, HealthComponent, float, OldValue, float, NewValue, AActor*, Instigator);
 
+// 死亡一触发就广播
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDeathStarted);
 
 // 死亡状态
 UENUM(BlueprintType)
@@ -57,6 +59,10 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FHealthChanged OnMaxHealthChanged;
 
+	// 死亡一触发就广播
+	UPROPERTY(BlueprintAssignable)
+	FDeathStarted OnDeathStarted;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -69,4 +75,8 @@ protected:
 	UFUNCTION()
 	void OnRep_MaxHealth(float OldValue);
 
+private:
+
+	// 启动死亡函数
+	void StartDeath();
 };

@@ -12,6 +12,7 @@
 AShooterPlayerController::AShooterPlayerController()
 {
 	bReplicates = true;
+	bPawnAlive = true;
 }
 
 void AShooterPlayerController::BeginPlay()
@@ -42,6 +43,7 @@ void AShooterPlayerController::Input_Crouch()
 {
 	// 检测玩家角色是否有效
 	if (!IsValid(GetCharacter())) return;
+	if (!bPawnAlive) return;
 	
 	// 玩家角色有效，在从玩家角色中获取移动组件
 	if (UCharacterMovementComponent* CMC = GetCharacter()->GetCharacterMovement(); IsValid(CMC))
@@ -54,6 +56,8 @@ void AShooterPlayerController::Input_Crouch()
 void AShooterPlayerController::Input_Jump()
 {
 	if (!IsValid(GetCharacter())) return;
+	if (!bPawnAlive) return;
+
 	UCharacterMovementComponent* CMC = GetCharacter()->GetCharacterMovement();
 	if (!IsValid(CMC)) return;
 
@@ -70,6 +74,8 @@ void AShooterPlayerController::Input_Jump()
 
 void AShooterPlayerController::Input_Mover(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+
 	// 移动的方向，得根据鼠标旋转和控制旋转来定
 	// input is a Vector2D
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
@@ -97,6 +103,8 @@ void AShooterPlayerController::Input_Mover(const FInputActionValue& InputActionV
 
 void AShooterPlayerController::Input_Look(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+
 	// input is a Vector2D
 	const FVector2D InputActionVector = InputActionValue.Get<FVector2D>();
 

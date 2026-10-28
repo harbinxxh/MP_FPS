@@ -117,6 +117,14 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_HitReact(int32 MontageIndex);
 
+	// 死亡触发时回调
+	UFUNCTION()
+	void OnDeathStarted();
+
+	// 视觉死亡效果,蓝图可实现事件
+	UFUNCTION(BlueprintImplementableEvent)
+	void DeathEffects();
+
 private:
 
 	// 切换武器回调函数

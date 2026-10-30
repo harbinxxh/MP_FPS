@@ -82,6 +82,11 @@ public:
 	TArray<TObjectPtr<UAnimMontage>> HitReacts;
 
 protected:
+
+	// 1st person View (arms) 用于第一人称视角的手臂
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Mesh")
+	TObjectPtr<USkeletalMeshComponent> Mesh1P;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Health")
 	TObjectPtr<UHealthComponent> Health;
 
@@ -153,10 +158,6 @@ private:
 	FRotator StartingAimRotation;
 	// 插值变量：专门负责插值处理
 	float InterpA0_Yaw;
-
-	// 1st person View (arms) 用于第一人称视角的手臂
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USkeletalMeshComponent> Mesh1P;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArm;

@@ -81,6 +81,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "FPS|HitReact")
 	TArray<TObjectPtr<UAnimMontage>> HitReacts;
 
+	// 重生时间
+	UPROPERTY(EditDefaultsOnly, Category = "FPS|Respawn")
+	float RespawnTime;
+
 protected:
 
 	// 1st person View (arms) 用于第一人称视角的手臂
@@ -158,6 +162,12 @@ private:
 	FRotator StartingAimRotation;
 	// 插值变量：专门负责插值处理
 	float InterpA0_Yaw;
+
+	// 用于重生计时器
+	FTimerHandle DeathTimer;
+
+	UFUNCTION()
+	void DeathTimerFinished(); // 用于重生计时器回调函数
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArm;

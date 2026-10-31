@@ -14,7 +14,8 @@ class MP_FPS_API AShooterGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
-	
-	
-	
+public:
+
+	void RequestRespawn(ACharacter* Character, AController* Controller);
+
 };

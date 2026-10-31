@@ -14,6 +14,9 @@
 #include "Components/CapsuleComponent.h"
 #include "MP_FPS/MP_FPS.h"
 #include "Player/ShooterPlayerController.h"
+#include "TimerManager.h"
+#include "Game/ShooterGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 
 AShooterCharacter::AShooterCharacter()
@@ -78,6 +81,7 @@ AShooterCharacter::AShooterCharacter()
 	DefaultFieldOfView = 90.0f;
 	TurningStatus = ETurningInPlace::NotTurning;
 	bWeaponFirstReplicated = false; // 它只用于记录客户端武器首次复制的时机
+	RespawnTime = 3.f; // 设置重生时间
 }
 
 void AShooterCharacter::BeginPlay()
@@ -394,6 +398,9 @@ void AShooterCharacter::OnDeathStarted()
 	if (HasAuthority())
 	{
 		Combat->DestroyInventory();
+
+		// 在服务器上调用，死亡开始后，启动计时器, 等死亡倒计时结束时，就会触发 DeathTimerFinished() 函数
+		GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &ThisClass::DeathTimerFinished, RespawnTime);
 	}
 
 	if (GetNetMode() != NM_DedicatedServer)
@@ -413,6 +420,16 @@ void AShooterCharacter::OnDeathStarted()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(FPSTraceChannels::ECC_Weapon, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(FPSTraceChannels::ECC_Weapon, ECR_Ignore);
+}
+
+// 用于重生计时器回调函数
+void AShooterCharacter::DeathTimerFinished()
+{
+	AShooterGameModeBase* GM = Cast<AShooterGameModeBase>(UGameplayStatics::GetGameMode(this));
+	if (GM)
+	{
+		GM->RequestRespawn(this, GetController());
+	}
 }
 
 void AShooterCharacter::Input_CycleWeapon()

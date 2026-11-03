@@ -14,6 +14,7 @@ class UCombatComponent;
 class UInputAction;
 class AWeapon;
 class UHealthComponent;
+class UEliminationComponent;
 
 
 // 定义一个委托，用来在武器首次复制时触发广播
@@ -91,12 +92,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Mesh")
 	TObjectPtr<USkeletalMeshComponent> Mesh1P;
 
+	// 健康组件
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Health")
 	TObjectPtr<UHealthComponent> Health;
 
-	// BlueprintReadOnly 默认不能作用于 private 私有成员内
+	// 战斗组件 BlueprintReadOnly 默认不能作用于 private 私有成员内
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Combat")
 	TObjectPtr<UCombatComponent> Combat;
+
+	// 击杀组件
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Elimination")
+	TObjectPtr<UEliminationComponent> Elimination;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPS|Camera")
 	TObjectPtr<UCameraComponent> FirstPersonCamera;

@@ -348,6 +348,9 @@ void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& Hit)
 	if (!IsValid(CurrentWeapon)) return;
 	if (CurrentWeapon->Ammo <= 0) return;
 
+	// TODO: Broadcast OnRoundReported 确保把所有数据都采集到位，并广播完整的击杀信息，让击杀组件能接收到并处理。
+	// （攻击者、受害者、击中、头部命中、致命）
+
 	// 计算伤害
 	if (IsValid(Hit.GetActor()) && Hit.GetActor()->Implements<UPlayerInterface>())
 	{

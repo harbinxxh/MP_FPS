@@ -21,6 +21,9 @@ enum class EDeathState : uint8
 	beathFinished	// 死亡结束
 };
 
+/**
+ * 健康组件
+ */
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MP_FPS_API UHealthComponent : public UActorComponent
 {

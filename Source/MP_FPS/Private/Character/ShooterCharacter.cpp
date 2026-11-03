@@ -17,6 +17,7 @@
 #include "TimerManager.h"
 #include "Game/ShooterGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Elimination/EliminationComponent.h"
 
 
 AShooterCharacter::AShooterCharacter()
@@ -73,9 +74,12 @@ AShooterCharacter::AShooterCharacter()
 
 	Combat = CreateDefaultSubobject<UCombatComponent>("Combat");
 	Combat->SetIsReplicated(true);// 开启组件复制功能
+	
+	Elimination = CreateDefaultSubobject<UEliminationComponent>("Elimination");
+	Elimination->SetIsReplicated(false); // 关闭组件复制功能，这些逻辑都只会在服务器端运行
 
 	Health = CreateDefaultSubobject<UHealthComponent>("Health");
-	Health->SetIsReplicated(true);// 开启组件复制功能
+	Health->SetIsReplicated(true);
 
 	// 角色默认视野值
 	DefaultFieldOfView = 90.0f;
@@ -97,6 +101,11 @@ void AShooterCharacter::BeginPlay()
 	if (AShooterPlayerController* PC = Cast<AShooterPlayerController>(GetController()); IsValid(PC))
 	{
 		PC->bPawnAlive = true;
+	}
+
+	if (HasAuthority())
+	{
+		Combat->OnRoundReported.AddDynamic(Elimination, &UEliminationComponent::OnRoundReported);
 	}
 }
 

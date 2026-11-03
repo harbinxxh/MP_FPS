@@ -21,6 +21,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAimingStatusChanged, bool, IsAiming
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetingPlayerStatusChanged, bool, IsAiming);
 // (武器备用弹药量变更时) 广播当前武器备用弹药量和武器的弹药量、武器图标材质
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCurrentReserveAmmoChanged, int32, RoundsInReserve, int32, RoundsInWeapon, UMaterialInterface*, WeaponIconMaterial);
+// (击杀玩家时) 广播击杀状态（攻击者、受害者、击中、头部命中、致命）
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FRoundReported, AActor*, Attacker, AActor*, Victim, bool, bHit, bool, bHeadShot, bool, bLethal);
+
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -76,6 +79,10 @@ public:
 	// (武器备用弹药量变更时) 广播当前武器备用弹药量和武器的弹药量、武器材质图标
 	UPROPERTY(BlueprintAssignable)
 	FCurrentReserveAmmoChanged OnCurrentReserveAmmoChanged;
+
+	// (击杀玩家时) 广播击杀状态
+	UPROPERTY(BlueprintAssignable)
+	FRoundReported OnRoundReported;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponData;

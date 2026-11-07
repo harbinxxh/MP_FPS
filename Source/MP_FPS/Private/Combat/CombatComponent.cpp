@@ -348,14 +348,20 @@ void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& Hit)
 	if (!IsValid(CurrentWeapon)) return;
 	if (CurrentWeapon->Ammo <= 0) return;
 
-	// TODO: Broadcast OnRoundReported 确保把所有数据都采集到位，并广播完整的击杀信息，让击杀组件能接收到并处理。
-	// （攻击者、受害者、击中、头部命中、致命）
-
-	// 计算伤害
-	if (IsValid(Hit.GetActor()) && Hit.GetActor()->Implements<UPlayerInterface>())
+	// 是否击中玩家
+	const bool bHit = IsValid(Hit.GetActor()) && Hit.GetActor()->Implements<UPlayerInterface>();
+	// 是否击中头部
+	bool const bHeadshot = Hit.BoneName == "head"; // 这是判断是否头部击中的方法，骨骼名称硬编码是为了省事，也可以改成命名常量，
+	bool bLethal = false;
+	
+	if (bHit)
 	{
-		IPlayerInterface::Execute_DoDamage(Hit.GetActor(), CurrentWeapon->Damage, GetOwner());
+		// 是否致命
+		bLethal = IPlayerInterface::Execute_DoDamage(Hit.GetActor(), CurrentWeapon->Damage, GetOwner());
 	}
+
+	// 广播完整的击杀信息（攻击者、受害者、击中、头部命中、致命）让击杀组件能接收到并处理
+	OnRoundReported.Broadcast(GetOwner(), Hit.GetActor(), bHit, bHeadshot, bLethal);
 
 	// 只在特定条件下执行
 	// 1、不是 ListenServer 服务器，在监听服务器模式下且处于本地控制状态，那说明就是主机，而且我们就是触发本地开火的玩家，所以弹药已设为自身减一

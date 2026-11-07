@@ -22,11 +22,13 @@ AShooterPlayerState::AShooterPlayerState()
 
 }
 
+// 击杀数
 void AShooterPlayerState::AddScoredElim()
 {
 	++ScoredElims;
 }
 
+// 击败数
 void AShooterPlayerState::AddDefeat()
 {
 	++Defeats;

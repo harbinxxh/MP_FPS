@@ -19,7 +19,9 @@ public:
 
 	AShooterPlayerState();
 
+	// 击杀数
 	void AddScoredElim();
+	// 击败数
 	void AddDefeat();
 	void AddHit();
 	void AddMiss();

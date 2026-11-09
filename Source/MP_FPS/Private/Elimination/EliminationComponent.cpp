@@ -3,6 +3,7 @@
 
 #include "Elimination/EliminationComponent.h"
 #include "Player/ShooterPlayerState.h"
+#include "ShooterTypes/ShooterTypes.h"
 
 
 UEliminationComponent::UEliminationComponent()
@@ -40,6 +41,8 @@ void UEliminationComponent::PnocessElimination(bool bHeadShot, AShooterPlayerSta
 {
 	AttackerPS->AddScoredElim();
 	VictimPS->AddDefeat();
+
+	ESpecialElimType SpecialElimType{};
 
 	// Process Head Shot
 	// Process Sequential Eliminations

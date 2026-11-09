@@ -63,3 +63,34 @@ struct FReticleParams
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float TargetingPlayerInterpSpeed = 10.f; // 瞄准玩家时的插值速度
 };
+
+/**
+ * 特殊枚举:用来存储多种可能的特殊击杀类型，如果枚举类型不是 uint8，那就不能当蓝图类型用
+ * 
+ * BitFlags 是什么意思? 可以用枚举的 16 位，能随时翻转这些位的状态，随时都能检查这些位是否被置位
+ * 
+ * 使用 ENUM_CLASS_FLAGS(ESpecialElimType) 宏才能生效
+ */
+// 特殊击杀类型枚举
+UENUM(meta = (BitFlags))
+enum class ESpecialElimType : int16
+{
+	None			= 0,
+	Headshot		= 1 << 0,		// 00000000 00000001 - 爆头击杀
+	Sequential		= 1 << 1,		// 00000000 00000010 - 连续击杀 ：短时间内多次击杀，如三杀、四杀、五杀等
+	Streak			= 1 << 2,		// 00000000 00000100 - 连击击杀
+	Revenge			= 1 << 3,		// 00000000 00001000 - 复仇击杀
+	Dethrone		= 1 << 4,		// 00000000 00010000 - 击败榜首击杀
+	Showstopper		= 1 << 5,		// 00000000 00100000 - 终结连杀
+	FirstBlood		= 1 << 6,		// 00000000 01000000 - 首杀
+	GainedTheLead	= 1 << 7,		// 00000000 10000000 - 赢得领先
+	TiedTheLeader	= 1 << 8,		// 00000001 00000000 - 追平领先
+	LostTheLead		= 1 << 9		// 00000010 00000000 - 失去领先者
+};
+
+ENUM_CLASS_FLAGS(ESpecialElimType)
+
+
+
+
+

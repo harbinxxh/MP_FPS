@@ -41,10 +41,12 @@ void UEliminationComponent::PnocessElimination(bool bHeadShot, AShooterPlayerSta
 {
 	AttackerPS->AddScoredElim();
 	VictimPS->AddDefeat();
-
-	ESpecialElimType SpecialElimType{};
-
+	
+	ESpecialElimType SpecialElimType{}; // 初始化特殊击杀类型所有位均为 0
+	
 	// Process Head Shot
+	ProcessHeadshot(bHeadShot, SpecialElimType, AttackerPS);
+
 	// Process Sequential Eliminations
 	// Process Streaks
 	// Handle First Blood
@@ -54,6 +56,17 @@ void UEliminationComponent::PnocessElimination(bool bHeadShot, AShooterPlayerSta
 		// Tell the client which special elims we got
 	// else (We just got a regular elim) 非特殊击杀的情况
 		// Just tell the client we got a regular elim
+}
+
+void UEliminationComponent::ProcessHeadshot(bool bHeadShot, ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS)
+{
+	// 特殊击杀类型会把这次击杀算作头部击中
+	if (bHeadShot)
+	{
+		//（或等于 |= 运算符）等于右边的写法（Headshot += 1 或  Headshot = Headshot + 1）
+		OutElimType |= ESpecialElimType::Headshot;
+		AttackerPS->AddHeadShotElim();
+	}
 }
 
 void UEliminationComponent::ProcessHitOrMiss(bool bHit, AShooterPlayerState* AttackerPS)

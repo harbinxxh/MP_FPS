@@ -7,6 +7,7 @@
 #include "EliminationComponent.generated.h"
 
 class AShooterPlayerState;
+enum class ESpecialElimType : uint16;
 
 /**
  * 击杀组件
@@ -29,4 +30,6 @@ private:
 	void ProcessHitOrMiss(bool bHit, AShooterPlayerState* AttackerPS);
 	// 处理击杀函数
 	void PnocessElimination(bool bHeadShot, AShooterPlayerState* AttackerPS, AShooterPlayerState* VictimPS);
+	// 处理头部击杀函数
+	void ProcessHeadshot(bool bHeadShot, ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS);
 };

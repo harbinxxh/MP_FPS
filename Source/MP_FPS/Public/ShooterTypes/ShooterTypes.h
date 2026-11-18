@@ -73,7 +73,7 @@ struct FReticleParams
  */
 // 特殊击杀类型枚举
 UENUM(meta = (BitFlags))
-enum class ESpecialElimType : int16
+enum class ESpecialElimType : uint16
 {
 	None			= 0,
 	Headshot		= 1 << 0,		// 00000000 00000001 - 爆头击杀

@@ -24,7 +24,15 @@ public:
 	UFUNCTION()
 	void OnRoundReported(AActor* Attacker, AActor* Victim, bool bHit, bool bHeadShot, bool bLethal);
 
+	// 连续击杀时间间隔（短时间内多次击杀）
+	UPROPERTY(EditDefaultsOnly, Category = "FPS|Elimination")
+	float SequentialElimInterval;
+
 private:
+
+	float LastElimTime;		// 上一次击杀时间
+	int32 SequentialElims;	// 连续击杀
+
 	AShooterPlayerState* GetPlayerStateFromActor(AActor* Actor);
 	// 处理命中或未命中结果的函数
 	void ProcessHitOrMiss(bool bHit, AShooterPlayerState* AttackerPS);
@@ -32,4 +40,6 @@ private:
 	void PnocessElimination(bool bHeadShot, AShooterPlayerState* AttackerPS, AShooterPlayerState* VictimPS);
 	// 处理头部击杀函数
 	void ProcessHeadshot(bool bHeadShot, ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS);
+	// 处理连续击杀函数
+	void ProcessSequentialEliminations(ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS);
 };

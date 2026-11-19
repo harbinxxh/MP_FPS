@@ -9,10 +9,11 @@
 UEliminationComponent::UEliminationComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
+	SequentialElimInterval = 2.f;
+	LastElimTime = 0.f;
+	SequentialElims = 0;
 }
 
-// 
 /**
  * 每当有射击发生，击杀组件都能立刻收到通知
  * 在战斗组件中，当在服务器端开枪的时候，就把相关信息广播给击杀组件
@@ -47,7 +48,9 @@ void UEliminationComponent::PnocessElimination(bool bHeadShot, AShooterPlayerSta
 	// Process Head Shot
 	ProcessHeadshot(bHeadShot, SpecialElimType, AttackerPS);
 
-	// Process Sequential Eliminations
+	// Process Sequential Eliminations 处理连续击杀
+	ProcessSequentialEliminations(SpecialElimType, AttackerPS);
+
 	// Process Streaks
 	// Handle First Blood
 	// Update Leader Status
@@ -60,12 +63,31 @@ void UEliminationComponent::PnocessElimination(bool bHeadShot, AShooterPlayerSta
 
 void UEliminationComponent::ProcessHeadshot(bool bHeadShot, ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS)
 {
-	// 特殊击杀类型会把这次击杀算作头部击中
 	if (bHeadShot)
 	{
 		//（或等于 |= 运算符）等于右边的写法（Headshot += 1 或  Headshot = Headshot + 1）
 		OutElimType |= ESpecialElimType::Headshot;
 		AttackerPS->AddHeadShotElim();
+	}
+}
+
+void UEliminationComponent::ProcessSequentialEliminations(ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS)
+{
+	const float CurrentTime = GetWorld()->GetTimeSeconds();
+	if (CurrentTime - LastElimTime <= SequentialElimInterval)
+	{
+		++SequentialElims;
+	}
+	else
+	{
+		SequentialElims = 1;
+	}
+	LastElimTime = CurrentTime;
+
+	if (SequentialElims > 1)
+	{
+		OutElimType |= ESpecialElimType::Sequential;	// 连续击杀位
+		AttackerPS->AddSequentialElim(SequentialElims); // 更新攻击者玩家连续击杀状态
 	}
 }
 

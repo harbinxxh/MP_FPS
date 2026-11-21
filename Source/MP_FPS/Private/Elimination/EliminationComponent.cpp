@@ -12,6 +12,8 @@ UEliminationComponent::UEliminationComponent()
 	SequentialElimInterval = 2.f;
 	LastElimTime = 0.f;
 	SequentialElims = 0;
+	Streak = 0;
+	ElimsNeededForStreak = 5; // 如果你连续击杀五个敌人而不死亡，那你就是在连胜状态
 }
 
 /**
@@ -48,10 +50,12 @@ void UEliminationComponent::PnocessElimination(bool bHeadShot, AShooterPlayerSta
 	// Process Head Shot
 	ProcessHeadshot(bHeadShot, SpecialElimType, AttackerPS);
 
-	// Process Sequential Eliminations 处理连续击杀
+	// Process Sequential Eliminations 处理连续击杀-相邻击杀必须落在时间窗口内，时间窗口一过连段清空。短时间内多次击杀，如三杀、四杀、五杀等
 	ProcessSequentialEliminations(SpecialElimType, AttackerPS);
 
-	// Process Streaks
+	// Process Streaks 连击 - 就是指在被击倒前的击杀数，只看是否阵亡，击杀间隔多久都不影响累加
+	PnocessStreaks(SpecialElimType, AttackerPS, VictimPS);
+
 	// Handle First Blood
 	// Update Leader Status
 
@@ -86,9 +90,41 @@ void UEliminationComponent::ProcessSequentialEliminations(ESpecialElimType& OutE
 
 	if (SequentialElims > 1)
 	{
-		OutElimType |= ESpecialElimType::Sequential;	// 连续击杀位
+		OutElimType |= ESpecialElimType::Sequential;	// 连续击杀位置位
 		AttackerPS->AddSequentialElim(SequentialElims); // 更新攻击者玩家连续击杀状态
 	}
+}
+
+void UEliminationComponent::PnocessStreaks(ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS, AShooterPlayerState* VictimPS)
+{
+	++Streak;
+
+	// 判断连击是否达到了所需的击杀数，所以要检查连击数是否达到触发所需的击杀数
+	if (Streak >= ElimsNeededForStreak)
+	{
+		// 击杀类型对连击位执行按位或赋值
+		OutElimType |= ESpecialElimType::Streak;	// 连击位置位
+		AttackerPS->SetOnStreak(true);
+		AttackerPS->UpdateHighestStreak(Streak);
+	}
+
+	// 检查受害者是否正在连胜中
+	if (VictimPS->IsOnStreak())
+	{
+		OutElimType |= ESpecialElimType::Showstopper;	// 终结连杀位置位
+		AttackerPS->AddShowStopperElim();
+		VictimPS->SetOnStreak(false);
+	}
+
+	// 检查上一个击杀者是否是现在的受害者
+	if (AttackerPS->GetLastAttacker() == VictimPS)
+	{
+		// 如果上一个攻击者（LastAttacker）是受害者，我们就正好击杀了自己的上一个攻击者，这就意味着我们触发了复仇击杀
+		OutElimType |= ESpecialElimType::Revenge;	// 复仇击杀位置位
+		AttackerPS->AddRevengeElim();
+		AttackerPS->SetLastAttacker(nullptr);
+	}
+	VictimPS->SetLastAttacker(AttackerPS);
 }
 
 void UEliminationComponent::ProcessHitOrMiss(bool bHit, AShooterPlayerState* AttackerPS)

@@ -7,7 +7,9 @@
 #include "EliminationComponent.generated.h"
 
 class AShooterPlayerState;
+class AShooterGameStateBase;
 enum class ESpecialElimType : uint16;
+
 
 /**
  * 击杀组件
@@ -49,4 +51,6 @@ private:
 	void ProcessSequentialEliminations(ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS);
 	// 处理连击函数 - 连击就是指在被击杀前的击杀次数，只看是否阵亡，击杀间隔多久都不影响累加
 	void PnocessStreaks(ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS, AShooterPlayerState* VictimPS);
+	// 处理首杀函数
+	void HandleFinstBLood(AShooterGameStateBase* GameState, ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS);
 };

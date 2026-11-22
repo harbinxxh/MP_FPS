@@ -4,6 +4,8 @@
 #include "Elimination/EliminationComponent.h"
 #include "Player/ShooterPlayerState.h"
 #include "ShooterTypes/ShooterTypes.h"
+#include "Game/ShooterGameStateBase.h"
+#include "Kismet/GameplayStatics.h"
 
 
 UEliminationComponent::UEliminationComponent()
@@ -56,7 +58,15 @@ void UEliminationComponent::PnocessElimination(bool bHeadShot, AShooterPlayerSta
 	// Process Streaks 连击 - 就是指在被击倒前的击杀数，只看是否阵亡，击杀间隔多久都不影响累加
 	PnocessStreaks(SpecialElimType, AttackerPS, VictimPS);
 
-	// Handle First Blood
+	// 获取游戏状态
+	AShooterGameStateBase* GameState = Cast<AShooterGameStateBase>(UGameplayStatics::GetGameState(AttackerPS));
+	if (IsValid(GameState))
+	{
+		// Handle First Blood 首次击杀
+		HandleFinstBLood(GameState, SpecialElimType, AttackerPS);
+	}
+
+
 	// Update Leader Status
 
 	// if (Has Special Elim Types) 特殊击杀的情况
@@ -125,6 +135,15 @@ void UEliminationComponent::PnocessStreaks(ESpecialElimType& OutElimType, AShoot
 		AttackerPS->SetLastAttacker(nullptr);
 	}
 	VictimPS->SetLastAttacker(AttackerPS);
+}
+
+void UEliminationComponent::HandleFinstBLood(AShooterGameStateBase* GameState, ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS)
+{
+	if (!GameState->HasFirstBloodBeenHad())
+	{
+		OutElimType |= ESpecialElimType::FirstBlood;
+		AttackerPS->GotFirstBlood();
+	}
 }
 
 void UEliminationComponent::ProcessHitOrMiss(bool bHit, AShooterPlayerState* AttackerPS)

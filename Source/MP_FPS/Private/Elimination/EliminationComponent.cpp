@@ -66,8 +66,11 @@ void UEliminationComponent::PnocessElimination(bool bHeadShot, AShooterPlayerSta
 		HandleFinstBLood(GameState, SpecialElimType, AttackerPS);
 	}
 
+	// Update Leader Status 可以是多个领先者，不止一个领先者玩家
 
-	// Update Leader Status
+
+
+
 
 	// if (Has Special Elim Types) 特殊击杀的情况
 		// Tell the client which special elims we got

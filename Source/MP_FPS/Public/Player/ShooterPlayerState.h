@@ -39,6 +39,8 @@ public:
 
 	bool IsOnStreak();
 	APlayerState* GetLastAttacker() const;
+	int32 GetScoredElims() const;
+
 private:
 	
 	int32 ScoredElims;		// 击杀数

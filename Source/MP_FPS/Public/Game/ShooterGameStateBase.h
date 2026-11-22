@@ -6,6 +6,8 @@
 #include "GameFramework/GameStateBase.h"
 #include "ShooterGameStateBase.generated.h"
 
+class AShooterPlayerState;
+
 /**
  * 游戏状态类：
  *     游戏状态能保存整个游戏的运行状态，比如首次击杀这类信息，它都能存下来，还能记录谁暂时领先
@@ -25,8 +27,19 @@ public:
 	bool HasFirstBloodBeenHad() const;
 	// 更新领先者的方法
 	void UpdateLeader();
+
+	// 如果有多位领先者，就返回空指针。
+	// 但如果只有一个领导者，就返回这个玩家状态。
+	AShooterPlayerState* GetSoleLeader() const;
+
+	// 判断某个玩家状态是否并列第一
+	bool IsTiedForTheLead(AShooterPlayerState* PlayerState);
+
 private:
 	// 是否已发生首次击杀
 	bool bHasFirstBloodBeenHad;
 
+	// 多个领先者玩家状态数组
+	UPROPERTY()
+	TArray<TObjectPtr<AShooterPlayerState>> Leaders;
 };

@@ -5,7 +5,7 @@
 
 AShooterPlayerState::AShooterPlayerState()
 {
-	NetUpdateFrequency = 100.f;
+	SetNetUpdateFrequency(100.f);
 
 	ScoredElims	= 0;
 	Defeats = 0;
@@ -131,4 +131,14 @@ APlayerState* AShooterPlayerState::GetLastAttacker() const
 int32 AShooterPlayerState::GetScoredElims() const
 {
 	return ScoredElims;
+}
+
+/**
+ * 那为什么要为客户端失去领先另设一个RPC?
+ * 因为这个 OutElimType 枚举是专属于攻击者的
+ * 所有操作都是针对攻击者的，我们正在处理攻击者的击杀组件，上一个领先者，需要告诉那个人，他已经失去领先了
+ */
+void AShooterPlayerState::Client_LostTheLead_Implementation()
+{
+	// TOD0: Show the client that they've lost the lead. 向客户显示他们已经失去了领先者
 }

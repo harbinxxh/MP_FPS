@@ -64,12 +64,9 @@ void UEliminationComponent::PnocessElimination(bool bHeadShot, AShooterPlayerSta
 	{
 		// Handle First Blood 首次击杀
 		HandleFinstBLood(GameState, SpecialElimType, AttackerPS);
+		// Update Leader Status 更新领先者状态，可以是多个领先者，不止一个领先者
+		UpdateLeaderStatus(GameState, SpecialElimType, AttackerPS, VictimPS);
 	}
-
-	// Update Leader Status 可以是多个领先者，不止一个领先者玩家
-
-
-
 
 
 	// if (Has Special Elim Types) 特殊击杀的情况
@@ -146,6 +143,52 @@ void UEliminationComponent::HandleFinstBLood(AShooterGameStateBase* GameState, E
 	{
 		OutElimType |= ESpecialElimType::FirstBlood;
 		AttackerPS->GotFirstBlood();
+	}
+}
+
+void UEliminationComponent::UpdateLeaderStatus(AShooterGameStateBase* GameState, ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS, AShooterPlayerState* VictimPS)
+{
+	// 首先，如果存在唯一的领先者，那就从游戏状态中获取这个领先者
+	AShooterPlayerState* LastLeader = GameState->GetSoleLeader();
+	// 判断攻击者是否并列领先
+	const bool bAttackerWasTiedForTheLead = GameState->IsTiedForTheLead(AttackerPS);
+	// 更新领先者状态
+	GameState->UpdateLeader();
+
+	// 如果攻击者之前并不在并列领先中，同时也要确认攻击者现在是否并列领先
+	if (!bAttackerWasTiedForTheLead && GameState->IsTiedForTheLead(AttackerPS))
+	{
+		// Attacker was not tied for the lead before and is now tied for the lead
+		// 换句话说，攻击者之前不是并列领先，现在成了并列领先，这就是特殊的击杀类型
+		OutElimType |= ESpecialElimType::TiedTheLeader;
+
+		// 检查上一位领先者是不是已经不再是当前的领先者
+		if (IsValid(LastLeader) && LastLeader != GameState->GetSoleLeader() )
+		{
+			/**
+			 * 那为什么要为客户端失去领先另设一个RPC?
+			 * 因为这个 OutElimType 枚举是专属于攻击者的
+			 * 所有操作都是针对攻击者的，我们正在处理攻击者的击杀组件，上一个领先者，需要告诉那个人，他已经失去领先了
+			 * 
+			 * LastLeader has lost the lead
+			 * 如果，上一位领先者失去领先，那需要让当前玩家状态里的上一位领先者向客户端发送通知，告知客户端它已不再拥有领先。
+			 */
+			LastLeader->Client_LostTheLead();
+
+			// 是否是受害者
+			if (VictimPS == LastLeader)
+			{
+				// 如果是，这意味着我们刚刚击杀了上一位领先者
+				OutElimType |= ESpecialElimType::Dethrone;
+				AttackerPS->AddDethroneElim();
+			}
+		}
+	}
+
+	// 检查一下，攻击者是否不等于上一位领先者，且现在他成了唯一领先者
+	if (AttackerPS != LastLeader && AttackerPS == GameState->GetSoleLeader())
+	{
+		OutElimType |= ESpecialElimType::GainedTheLead;
 	}
 }
 

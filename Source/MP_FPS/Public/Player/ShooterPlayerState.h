@@ -41,6 +41,10 @@ public:
 	APlayerState* GetLastAttacker() const;
 	int32 GetScoredElims() const;
 
+	// 客户端RPC - 失去领先者通知
+	UFUNCTION(Client, Reliable)
+	void Client_LostTheLead();
+
 private:
 	
 	int32 ScoredElims;		// 击杀数

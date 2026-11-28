@@ -55,4 +55,6 @@ private:
 	void HandleFinstBLood(AShooterGameStateBase* GameState, ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS);
 	// 更新领先者状态
 	void UpdateLeaderStatus(AShooterGameStateBase* GameState, ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS, AShooterPlayerState* VictimPS);
+	// 处理特殊击杀
+	bool HasSpecialElimTypes(const ESpecialElimType& SpecialElimType) const;
 };

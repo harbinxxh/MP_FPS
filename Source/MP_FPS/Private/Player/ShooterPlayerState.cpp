@@ -133,6 +133,14 @@ int32 AShooterPlayerState::GetScoredElims() const
 	return ScoredElims;
 }
 
+void AShooterPlayerState::Client_SpecialElim_Implementation(const ESpecialElimType& SpecialElim, int32 SequentialElimCount, int32 StreakCount, int32 ElimScore)
+{
+}
+
+void AShooterPlayerState::Client_ScoredElim_Implementation(int32 ElimScore)
+{
+}
+
 /**
  * 那为什么要为客户端失去领先另设一个RPC?
  * 因为这个 OutElimType 枚举是专属于攻击者的

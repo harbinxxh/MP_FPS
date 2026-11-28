@@ -45,6 +45,14 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_LostTheLead();
 
+	// 客户端RPC - 普通击杀
+	UFUNCTION(Client, Reliable)
+	void Client_ScoredElim(int32 ElimScore);
+
+	// 客户端RPC - 特殊击杀
+	UFUNCTION(Client, Reliable)
+	void Client_SpecialElim(const ESpecialElimType& SpecialElim /*特殊击杀*/, int32 SequentialElimCount /*连续击杀计数*/, int32 StreakCount /*连杀计数*/, int32 ElimScore /*实际得分*/);
+
 private:
 	
 	int32 ScoredElims;		// 击杀数

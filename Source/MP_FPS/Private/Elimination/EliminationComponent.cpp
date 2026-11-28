@@ -68,11 +68,17 @@ void UEliminationComponent::PnocessElimination(bool bHeadShot, AShooterPlayerSta
 		UpdateLeaderStatus(GameState, SpecialElimType, AttackerPS, VictimPS);
 	}
 
-
-	// if (Has Special Elim Types) 特殊击杀的情况
-		// Tell the client which special elims we got
-	// else (We just got a regular elim) 非特殊击杀的情况
-		// Just tell the client we got a regular elim
+	// 是否是 (Has Special Elim Types) 特殊击杀的情况
+	if (HasSpecialElimTypes(SpecialElimType))
+	{
+		// 通知客户端特殊击杀
+		AttackerPS->Client_SpecialElim(SpecialElimType, SequentialElims, Streak, AttackerPS->GetScoredElims());
+	}
+	else
+	{
+		// 通知客户端普通击杀
+		AttackerPS->Client_ScoredElim(AttackerPS->GetScoredElims());
+	}
 }
 
 void UEliminationComponent::ProcessHeadshot(bool bHeadShot, ESpecialElimType& OutElimType, AShooterPlayerState* AttackerPS)
@@ -190,6 +196,11 @@ void UEliminationComponent::UpdateLeaderStatus(AShooterGameStateBase* GameState,
 	{
 		OutElimType |= ESpecialElimType::GainedTheLead;
 	}
+}
+
+bool UEliminationComponent::HasSpecialElimTypes(const ESpecialElimType& SpecialElimType) const
+{
+	return static_cast<uint16>(SpecialElimType) != 0;
 }
 
 void UEliminationComponent::ProcessHitOrMiss(bool bHit, AShooterPlayerState* AttackerPS)
